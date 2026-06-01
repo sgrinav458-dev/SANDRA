@@ -630,6 +630,96 @@ select.form-control{cursor:pointer}
 .lm-empty{text-align:center;padding:40px;color:var(--text3);font-size:14px}
 .lm-ok{background:#dcfce7;color:#15803d;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
 .lm-ko{background:#fee2e2;color:#dc2626;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
+
+/* ═══════════════════════════════════════════════════════════════
+   UNIDAD 2 · Embedded content styles (namespaced with u2-)
+═══════════════════════════════════════════════════════════════ */
+.u2-container { font-family: 'DM Sans', sans-serif; line-height: 1.6; }
+.u2-nav-tabs { display:flex; overflow-x:auto; scrollbar-width:none; border-bottom:2px solid #c8973a; background:#1a2744; border-radius:8px 8px 0 0; }
+.u2-nav-tabs::-webkit-scrollbar { display:none; }
+.u2-nav-tab { flex-shrink:0; padding:12px 18px; font-size:13px; font-weight:600; color:rgba(255,255,255,.55); cursor:pointer; border:none; background:none; font-family:inherit; transition:.2s; white-space:nowrap; border-bottom:3px solid transparent; margin-bottom:-2px; }
+.u2-nav-tab:hover { color:rgba(255,255,255,.85); }
+.u2-nav-tab.active { color:#e8b455; border-bottom-color:#c8973a; }
+.u2-main { padding:0; }
+.u2-section { display:none; padding:24px 0; animation:u2FadeUp .3s ease; }
+.u2-section.active { display:block; }
+@keyframes u2FadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+.u2-section h2 { font-family:'DM Serif Display',serif; font-size:22px; font-weight:700; color:#1a2744; margin:28px 0 14px; padding-bottom:8px; border-bottom:2px solid #c8973a; }
+.u2-section h2:first-child { margin-top:0; }
+.u2-section h3 { font-size:16px; font-weight:600; color:#243460; margin:22px 0 10px; }
+.u2-section h4 { font-size:12px; font-weight:700; color:#8a8aaa; text-transform:uppercase; letter-spacing:.06em; margin:16px 0 6px; }
+.u2-section p { margin-bottom:12px; color:#4a4a6a; font-size:14px; }
+.u2-asiento-wrap { overflow-x:auto; margin:14px 0 20px; }
+.u2-asiento { width:100%; border-collapse:collapse; font-size:13px; border:1px solid #ddd8cc; border-radius:8px; overflow:hidden; }
+.u2-asiento thead tr { background:#1a2744; color:#fff; }
+.u2-asiento thead th { padding:9px 12px; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; text-align:left; }
+.u2-asiento thead th:nth-child(2), .u2-asiento thead th:nth-child(4) { text-align:right; width:120px; }
+.u2-asiento tbody tr { border-bottom:1px solid #ddd8cc; }
+.u2-asiento tbody td { padding:8px 12px; vertical-align:middle; font-size:13px; color:#1c1c2e; }
+.u2-asiento tbody td:nth-child(2), .u2-asiento tbody td:nth-child(4) { text-align:right; font-family:monospace; font-weight:600; color:#1a2744; }
+.u2-asiento tfoot tr { background:#f2ede4; font-weight:700; }
+.u2-asiento tfoot td { padding:8px 12px; }
+.u2-asiento tfoot td:nth-child(2), .u2-asiento tfoot td:nth-child(4) { text-align:right; font-family:monospace; font-size:13px; font-weight:700; color:#1a2744; border-top:2px solid #1a2744; }
+.u2-cta-code { font-family:monospace; font-size:11px; font-weight:700; color:#1a2744; background:rgba(26,39,68,.07); padding:1px 5px; border-radius:3px; margin-right:3px; }
+.u2-callout { border-radius:7px; padding:12px 16px; margin:14px 0; border-left:4px solid; font-size:13px; }
+.u2-callout-info { background:#e8f0fc; border-color:#1a4a8a; color:#1a3a6a; }
+.u2-callout-tip { background:#fef9ec; border-color:#c8973a; color:#7a5400; }
+.u2-callout-warning { background:#fef2f0; border-color:#c0392b; color:#7a1800; }
+.u2-callout-success { background:#edfbf3; border-color:#1e6b3c; color:#0d4020; }
+.u2-act-card { background:#fff; border:1px solid #ddd8cc; border-radius:10px; margin-bottom:20px; overflow:hidden; box-shadow:0 2px 12px rgba(26,39,68,.08); }
+.u2-act-card-head { display:flex; align-items:center; gap:10px; padding:12px 18px; background:#f2ede4; border-bottom:1px solid #ddd8cc; flex-wrap:wrap; }
+.u2-act-num { font-family:'DM Serif Display',serif; font-size:20px; font-weight:700; color:#1a2744; min-width:28px; }
+.u2-act-title { font-weight:600; font-size:14px; flex:1; color:#243460; }
+.u2-act-stars { color:#c8973a; font-size:13px; }
+.u2-act-ce { font-size:10px; font-weight:700; background:#1a2744; color:#e8b455; padding:2px 7px; border-radius:8px; letter-spacing:.04em; }
+.u2-act-body { padding:18px; }
+.u2-act-enunciado { background:#faf8f4; border-left:3px solid #c8973a; padding:12px 14px; border-radius:0 7px 7px 0; margin-bottom:14px; font-size:13px; line-height:1.7; color:#1c1c2e; }
+.u2-act-datos { background:#edf3fc; border:1px solid #c8d8f0; border-radius:7px; padding:10px 14px; font-size:13px; margin-bottom:12px; }
+.u2-act-datos h4 { color:#1a4a8a; margin-bottom:6px; margin-top:0; }
+.u2-act-datos ul { padding-left:16px; }
+.u2-act-datos li { margin-bottom:3px; color:#4a4a6a; }
+.u2-sol-toggle { cursor:pointer; display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; color:#1a2744; padding:8px 12px; background:#f2ede4; border:1px solid #ddd8cc; border-radius:7px; margin-top:12px; user-select:none; transition:.15s; }
+.u2-sol-toggle:hover { background:#e8e3d8; }
+.u2-sol-toggle .arrow { transition:transform .25s; font-size:10px; }
+.u2-sol-toggle.open .arrow { transform:rotate(90deg); }
+.u2-sol-body { display:none; margin-top:10px; }
+.u2-sol-body.open { display:block; }
+.u2-tabla-cuentas { width:100%; border-collapse:collapse; font-size:13px; margin:10px 0 18px; }
+.u2-tabla-cuentas th { background:#f2ede4; padding:7px 10px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#8a8aaa; border-bottom:2px solid #ddd8cc; }
+.u2-tabla-cuentas td { padding:7px 10px; border-bottom:1px solid #ddd8cc; vertical-align:top; font-size:13px; }
+.u2-tabla-cuentas td:first-child { font-family:monospace; font-weight:600; color:#1a2744; white-space:nowrap; }
+.u2-tipo-iva { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:14px 0; }
+.u2-tipo-iva-card { background:#fff; border:1px solid #ddd8cc; border-radius:8px; padding:12px; text-align:center; }
+.u2-tipo-iva-card .pct { font-family:'DM Serif Display',serif; font-size:28px; font-weight:700; color:#1a2744; line-height:1; margin-bottom:4px; }
+.u2-tipo-iva-card .lbl { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#c8973a; margin-bottom:4px; }
+.u2-tipo-iva-card .desc { font-size:11px; color:#8a8aaa; }
+.u2-mnemonic { background:linear-gradient(135deg,#fff8e8,#fff3d0); border:1px solid #f0d080; border-radius:8px; padding:14px 18px; margin:14px 0; position:relative; }
+.u2-mnemonic::before { content:'💡'; font-size:20px; position:absolute; top:-10px; left:14px; background:#faf8f4; padding:0 4px; }
+.u2-mnemonic h4 { color:#c8973a; margin-top:4px; }
+.u2-mnemonic p { color:#5a4000; margin:0; font-size:13px; }
+.u2-step { display:flex; gap:12px; margin-bottom:14px; align-items:flex-start; }
+.u2-step-num { flex-shrink:0; width:26px; height:26px; border-radius:50%; background:#1a2744; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:2px; }
+.u2-step-body { flex:1; font-size:13px; color:#4a4a6a; }
+.u2-examen-op { background:#fff; border:1px solid #ddd8cc; border-radius:8px; margin-bottom:14px; overflow:hidden; }
+.u2-examen-op-head { background:#1a2744; color:#fff; padding:9px 14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.u2-examen-op-num { font-family:monospace; font-size:10px; font-weight:700; background:#c8973a; color:#1a2744; padding:2px 7px; border-radius:8px; }
+.u2-examen-op-fecha { font-size:11px; color:rgba(255,255,255,.6); margin-left:auto; }
+.u2-examen-op-body { padding:14px; }
+.u2-balance-tabla { width:100%; border-collapse:collapse; font-size:12px; margin:10px 0; }
+.u2-balance-tabla th { background:#1a2744; color:#fff; padding:7px 8px; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; text-align:right; }
+.u2-balance-tabla th:first-child, .u2-balance-tabla th:nth-child(2) { text-align:left; }
+.u2-balance-tabla td { padding:6px 8px; border-bottom:1px solid #ddd8cc; text-align:right; font-family:monospace; font-size:11px; }
+.u2-balance-tabla td:first-child { text-align:left; font-family:monospace; font-weight:600; color:#1a2744; }
+.u2-balance-tabla td:nth-child(2) { text-align:left; font-family:inherit; color:#4a4a6a; }
+.u2-balance-tabla tfoot td { font-weight:700; background:#f2ede4; border-top:2px solid #1a2744; }
+.u2-saldo-d { color:#1a4a8a; font-weight:700; }
+.u2-saldo-h { color:#c0392b; font-weight:700; }
+.u2-verified-footer { background:linear-gradient(135deg,#1a2744,#243460); color:#fff; border-radius:10px; padding:20px 24px; margin-top:32px; text-align:center; }
+.u2-verified-footer h3 { color:#e8b455; font-family:'DM Serif Display',serif; font-size:16px; margin-bottom:8px; }
+.u2-verified-footer p { color:rgba(255,255,255,.7); font-size:12px; margin:3px 0; }
+/* Prof edit overlay */
+.u2-prof-edit-bar { display:none; background:#fff3cd; border:1px solid #ffc107; border-radius:8px; padding:10px 16px; margin-bottom:16px; font-size:13px; color:#7a5000; align-items:center; gap:12px; }
+.role-profesor .u2-prof-edit-bar { display:flex; }
 </style>
 </head>
 <body>
@@ -858,12 +948,12 @@ select.form-control{cursor:pointer}
             </div>
           </div>
           <div class="tema-detail-area" id="tema-detail-panel">
-            <div id="tema-detail-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);text-align:center;padding:40px">
+            <div id="prof-tema-detail-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);text-align:center;padding:40px">
               <div style="font-size:52px;margin-bottom:14px">📖</div>
               <div style="font-size:16px;font-weight:500;color:var(--text2);margin-bottom:6px">Selecciona una unidad</div>
               <button type="button" class="btn btn-primary" onclick="openNewTema()">📖 Crear primera unidad</button>
             </div>
-            <div id="tema-detail-content" style="display:none;padding:24px 28px 40px;max-width:860px"></div>
+            <div id="prof-tema-detail-content" style="display:none;padding:24px 28px 40px;max-width:860px"></div>
           </div>
         </div>
       </div>
@@ -977,10 +1067,12 @@ select.form-control{cursor:pointer}
             <div class="temas-panel-list" id="alu-temas-panel-list"></div>
           </div>
           <div class="tema-detail-area" id="alu-tema-detail-panel">
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);text-align:center;padding:40px">
+            <div id="tema-detail-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);text-align:center;padding:40px">
               <div style="font-size:52px;margin-bottom:14px">📖</div>
-              <div style="font-size:16px;font-weight:500;color:var(--text2)">Selecciona una unidad</div>
+              <div style="font-size:16px;font-weight:500;color:var(--text2);margin-bottom:6px">Selecciona una unidad</div>
+              <div style="font-size:13px;color:var(--text3)">Elige un tema del panel izquierdo</div>
             </div>
+            <div id="tema-detail-content" style="display:none;overflow-y:auto;height:100%"></div>
           </div>
         </div>
       </div>
@@ -1617,13 +1709,21 @@ function renderAluInicio(){
 }
 
 function renderAluContenidos(){
-  const temas=JSON.parse(localStorage.getItem('tdc_temas')||'[]');
-  const list=document.getElementById('alu-temas-panel-list');
-  const det=document.getElementById('alu-tema-detail-panel');
-  if(!list)return;
-  if(!temas.length){list.innerHTML='<div class="temas-panel-empty">Sin temas disponibles aún.</div>';return;}
-  list.innerHTML=temas.map((t,i)=>`
-    <div class="tp-item" onclick="verTemaAlumno('${t.id}',this)">
+  // Usar variable global 'temas' cargada desde Supabase
+  const temasList = (typeof temas !== 'undefined' && temas.length) 
+    ? temas 
+    : JSON.parse(localStorage.getItem('tdc_temas')||'[]');
+  
+  const list = document.getElementById('alu-temas-panel-list');
+  if(!list) return;
+  
+  if(!temasList.length){
+    list.innerHTML = '<div class="temas-panel-empty">Sin temas disponibles aún.</div>';
+    return;
+  }
+  
+  list.innerHTML = temasList.map((t, i) => `
+    <div class="tp-item" id="tp-${t.id}" onclick="verTemaAlumno('${t.id}', this)">
       <div class="tp-num">${t.num||i+1}</div>
       <div class="tp-info">
         <div class="tp-title">${t.titulo}</div>
@@ -1633,93 +1733,32 @@ function renderAluContenidos(){
 }
 
 function verTemaAlumno(id, el){
-  if(el){
-    document.querySelectorAll('#alu-temas-panel-list .tp-item').forEach(e=>e.classList.remove('active'));
-    el.classList.add('active');
-  }
-  const temas=JSON.parse(localStorage.getItem('tdc_temas')||'[]');
-  const t=temas.find(x=>x.id===id); if(!t)return;
-  const allActs=JSON.parse(localStorage.getItem('tdc_activities')||'[]');
-  const allAsis=JSON.parse(localStorage.getItem('tdc_asientos')||'[]');
-  const acts=allActs.filter(a=>a.tema===id);
-  const actsAprend=acts.filter(a=>!a.puntos || +a.puntos===0);
-  const actsEvalu=acts.filter(a=>a.puntos && +a.puntos>0);
-  const asisTema=allAsis.filter(s=>s.tema===id);
-
-  const TIPO_ICO={quiz:'📝',tarea:'📋',examen:'⭐',practica:'⚙️'};
+  // Marcar activo en el panel
+  document.querySelectorAll('#alu-temas-panel-list .tp-item').forEach(e => e.classList.remove('active'));
+  if(el) el.classList.add('active');
   
-  const renderActCard=(a)=>{
-    const ico=TIPO_ICO[a.tipo]||'📋';
-    return `<div class="act-item" style="padding:9px 12px;margin-bottom:6px;cursor:pointer" onclick="verActividadAlumno&&verActividadAlumno('${a.id}')">
-      <div class="act-icon tipo-${a.tipo||'tarea'}" style="width:32px;height:32px;font-size:14px">${ico}</div>
-      <div class="act-info">
-        <div class="act-title" style="font-size:13px">${a.titulo}</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:2px">${a.desc?a.desc.substring(0,80)+(a.desc.length>80?'…':''):''}</div>
-        ${a.fecha?`<div style="font-size:10px;color:var(--text3);margin-top:2px">📅 ${a.fecha}</div>`:''}
-      </div>
-      ${a.puntos?`<span class="tag" style="background:#fff8e1;color:#8a5e00">⭐ ${a.puntos} pts</span>`:''}
-    </div>`;
-  };
+  // Redirigir al panel de detalle del profesor (compartido)
+  // Primero activar la vista de contenidos del área de alumno
+  const aluDetPanel = document.getElementById('alu-tema-detail-panel');
   
-  const renderAsientoCard=(s)=>{
-    const dif={basico:'⭐',medio:'⭐⭐',avanzado:'⭐⭐⭐'}[s.dificultad]||'';
-    return `<div class="act-item" style="padding:9px 12px;margin-bottom:6px;cursor:pointer" onclick="abrirAsientoAlumno&&abrirAsientoAlumno('${s.id}')">
-      <div class="act-icon" style="background:#dbeafe;color:#1e3a8a;width:32px;height:32px;font-size:14px">⚖️</div>
-      <div class="act-info">
-        <div class="act-title" style="font-size:13px">${s.titulo}</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:2px">${dif} · ${s.lineas?s.lineas.length+' líneas':''}${s.fecha?' · 📅 '+s.fecha:''}</div>
-      </div>
-      <span class="tag" style="background:#fff8e1;color:#8a5e00">⭐ ${s.puntos||10} pts</span>
-    </div>`;
-  };
-  
-  const empty=(icon,title,hint)=>`<div style="text-align:center;padding:36px 20px;color:var(--text3);background:var(--surface2);border-radius:9px"><div style="font-size:32px;margin-bottom:8px">${icon}</div><div style="font-size:14px;font-weight:600;margin-bottom:4px;color:var(--text)">${title}</div><div style="font-size:12px">${hint}</div></div>`;
-  
-  const tabTeoria=t.contenido && t.contenido.trim()?`<div class="tema-view-content">${t.contenido}</div>`:empty('📚','Sin contenido teórico','El profesor aún no ha publicado la teoría de este tema.');
-  const tabEjemplos=t.ejemplos && t.ejemplos.trim()?`<div class="tema-view-content">${t.ejemplos}</div>`:empty('💡','Sin ejemplos prácticos','El profesor aún no ha añadido ejercicios resueltos.');
-  const tabAprend=actsAprend.length?actsAprend.map(renderActCard).join(''):empty('📋','Sin actividades de aprendizaje','Las actividades de práctica aparecerán aquí.');
-  const tabEvalu=(actsEvalu.length||asisTema.length)?
-    `${actsEvalu.length?`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin:6px 0 8px">📋 Actividades evaluables (${actsEvalu.length})</div>${actsEvalu.map(renderActCard).join('')}`:''}
-     ${asisTema.length?`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin:14px 0 8px">⚖️ Ejercicios de asientos (${asisTema.length})</div>${asisTema.map(renderAsientoCard).join('')}`:''}`
-    :empty('⭐','Sin actividades evaluables','Las actividades con nota aparecerán aquí.');
-  const tabExamen=t.examen && t.examen.trim()?`<div class="tema-view-content">${t.examen}</div>`:empty('📝','Sin información del examen','El profesor publicará aquí los detalles del examen.');
-
-  const det=document.getElementById('alu-tema-detail-panel');
-  det.innerHTML=`<div style="padding:24px 28px 40px;max-width:920px">
-    <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Tema ${t.num||''}</div>
-    <h2 style="font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:${t.descShort?'8px':'14px'}">${t.titulo}</h2>
-    ${t.descShort?`<p style="font-size:13px;color:var(--text2);margin-bottom:14px;font-style:italic">${t.descShort}</p>`:''}
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
-      ${t.duracion?`<span class="tag" style="background:#fff8e1;color:#8a5e00">⏱ ${t.duracion}</span>`:''}
-      <span class="tag" style="background:var(--accent-l);color:var(--accent2)">📚 ${(t.ce||[]).length} CE</span>
-      <span class="tag" style="background:#ede9fe;color:#5b21b6">📋 ${actsAprend.length+actsEvalu.length} act.</span>
-      <span class="tag" style="background:#dbeafe;color:#1e40af">⚖️ ${asisTema.length} ejercicios</span>
-    </div>
-
-    <div class="tema-tabs-wrap">
-      <button class="tema-tab active" data-tta="teoria" onclick="ttSwitchAlu('teoria')">📚 Teoría</button>
-      <button class="tema-tab" data-tta="ejemplos" onclick="ttSwitchAlu('ejemplos')">💡 Ejemplos</button>
-      <button class="tema-tab" data-tta="aprendizaje" onclick="ttSwitchAlu('aprendizaje')">📋 Actividades de aprendizaje${actsAprend.length?` <span class="tt-count">${actsAprend.length}</span>`:''}</button>
-      <button class="tema-tab" data-tta="evaluables" onclick="ttSwitchAlu('evaluables')">⭐ Actividades evaluables${(actsEvalu.length+asisTema.length)?` <span class="tt-count">${actsEvalu.length+asisTema.length}</span>`:''}</button>
-      <button class="tema-tab" data-tta="examen" onclick="ttSwitchAlu('examen')">📝 Examen</button>
-    </div>
+  // Usar renderTemaDetailTabs que es la vista completa con 5 pestañas
+  if(typeof renderTemaDetailTabs === 'function'){
+    activeTemaId = id;
     
-    <div class="tema-tab-pane active" id="tta-teoria">${tabTeoria}</div>
-    <div class="tema-tab-pane" id="tta-ejemplos" style="display:none">${tabEjemplos}</div>
-    <div class="tema-tab-pane" id="tta-aprendizaje" style="display:none">${tabAprend}</div>
-    <div class="tema-tab-pane" id="tta-evaluables" style="display:none">${tabEvalu}</div>
-    <div class="tema-tab-pane" id="tta-examen" style="display:none">${tabExamen}</div>
-  </div>`;
-  
-  if(currentSession && currentSession.id){
-    const alumnos=getAlumnos();
-    const a=alumnos.find(x=>x.id===currentSession.id);
-    if(a){
-      if(!a.completedTemas) a.completedTemas=[];
-      if(!a.completedTemas.includes(id)){ a.completedTemas.push(id); saveAlumnos(alumnos); }
+    // Mostrar el panel de detalle del alumno
+    if(aluDetPanel){
+      // Asegurarse que el panel tiene los elementos necesarios
+      if(!document.getElementById('tema-detail-content') || !document.getElementById('tema-detail-empty')){
+        aluDetPanel.innerHTML = `
+          <div id="tema-detail-empty" style="display:none"></div>
+          <div id="tema-detail-content" style="display:none"></div>`;
+      }
     }
+    
+    renderTemaDetailTabs(id);
   }
 }
+
 
 function ttSwitchAlu(tab){
   document.querySelectorAll('[data-tta]').forEach(b=>b.classList.toggle('active', b.dataset.tta===tab));
@@ -2352,13 +2391,18 @@ function renderTemasPanel(){
 }
 
 function showTeamDetailEmpty(){
-  document.getElementById('tema-detail-empty').style.display='flex';
-  document.getElementById('tema-detail-content').style.display='none';
+  var isProf2 = sbProfile && sbProfile.rol === 'profesor' && !window._modoVistaAlumno;
+  var emptyId2 = isProf2 ? 'prof-tema-detail-empty' : 'tema-detail-empty';
+  var contId2  = isProf2 ? 'prof-tema-detail-content' : 'tema-detail-content';
+  var el2 = document.getElementById(emptyId2);
+  if(el2) el2.style.display='flex';
+  var cont2 = document.getElementById(contId2);
+  if(cont2) cont2.style.display='none';
 }
 
 function selectTema(id){
   activeTemaId=id;
-  document.querySelectorAll('.tp-item').forEach(el=>el.classList.toggle('active', el.id==='tp-'+id));
+  document.querySelectorAll('#temas-panel-list .tp-item').forEach(el=>el.classList.toggle('active', el.id==='tp-'+id));
   document.querySelectorAll('.tema-item').forEach(el=>el.classList.remove('active'));
   renderTemaDetailTabs(id);
 }
@@ -5082,12 +5126,20 @@ function mfPDF(modelo){
 function renderTemaDetailTabs(id){
   const t=temas.find(x=>x.id===id);
   if(!t){ showTeamDetailEmpty(); return; }
-  document.getElementById('tema-detail-empty').style.display='none';
-  const cont=document.getElementById('tema-detail-content');
-  cont.style.display='block';
+  
+  // Determine which panel to use (alumno or profesor)
+  var _isProf = sbProfile && sbProfile.rol === 'profesor' && !window._modoVistaAlumno;
+  const emptyId = isProf ? 'prof-tema-detail-empty' : 'tema-detail-empty';
+  const contId  = isProf ? 'prof-tema-detail-content' : 'tema-detail-content';
+  
+  var emptyEl = document.getElementById(emptyId);
+  var cont    = document.getElementById(contId);
+  if(emptyEl) emptyEl.style.display = 'none';
+  if(!cont){ console.error('No se encontró el panel:', contId); return; }
+  cont.style.display = 'block';
   
   activeTemaId = id;
-  const isProf = sbProfile && sbProfile.rol === 'profesor';
+  var isProf = _isProf; // Use the value computed above
   
   cont.innerHTML = `
     <div class="role-${isProf?'profesor':'alumno'}" style="padding:24px 28px 40px;max-width:1100px;margin:0 auto">
@@ -5163,7 +5215,18 @@ function ttFolder(temaId, tab){
       return '<div style="margin-bottom:16px">'+(s.titulo?'<div style="font-size:13px;font-weight:600;margin-bottom:6px">📊 '+s.titulo+'</div>':'')+'<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;border:1px solid var(--border)"><iframe src="'+s.url+'" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen loading="lazy"></iframe></div></div>';
     };
     
+    // Check if tema has embedded HTML content (from Skills-generated units)
+    const hasEmbedded = t.contenido_html && t.contenido_html.trim();
+    
     let html = `<div class="ft-panel-hint">Material teórico del tema: texto, vídeos y presentaciones.${isProf?' <span style="color:#2563eb;cursor:pointer" onclick="openEditTema(\''+temaId+'\')">[ ✏️ Editar ]</span>':''}</div>`;
+    
+    // If embedded HTML, show it with full editor capability
+    if(hasEmbedded){
+      html += isProf ? `<div class="u2-prof-edit-bar">✏️ <strong>Modo profesor:</strong> El contenido de esta unidad tiene formato enriquecido. <button class="btn btn-xs btn-primary" onclick="openEditTema('${temaId}')">Editar tema</button> <button class="btn btn-xs" onclick="u2EditSection('contenidos','${temaId}')">Editar contenidos</button></div>` : '';
+      html += t.contenido_html;
+      panel.innerHTML = html;
+      return;
+    }
     if(has || videos.length || slides.length){
       if(has) html += '<div class="tema-view-content" style="margin-bottom:24px">' + t.contenido + '</div>';
       if(videos.length) html += '<div style="margin-bottom:20px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:12px">🎬 Vídeos</div>' + videos.map(renderVideo).join('') + '</div>';
@@ -6353,6 +6416,7 @@ async function sbUpsertTema(t){
     id: t.id, num: t.num, titulo: t.titulo,
     desc_short: t.descShort,
     contenido: t.contenido || '',
+    contenido_html: t.contenido_html || '',
     ejemplos: t.ejemplos || '',
     examen: t.examen || '',
     duracion: t.duracion || '',
@@ -8857,6 +8921,41 @@ function asiVista(id, vista){
   const ejId = id.includes('__') ? id.split('__')[0] : id;
   if(vista === 'libroMayor') abrirLibroMayor(ejId, 'mayor');
   else if(vista === 'cuentasAnuales') abrirLibroMayor(ejId, 'balance');
+}
+
+
+/* ═══ UNIDAD 2 Embedded JS ═══ */
+function u2ShowSection(id, btn) {
+  document.querySelectorAll('.u2-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.u2-nav-tab').forEach(b => b.classList.remove('active'));
+  const sec = document.getElementById('u2-sec-' + id);
+  if(sec) sec.classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+function u2ToggleSol(el) {
+  el.classList.toggle('open');
+  const body = el.nextElementSibling;
+  if(body) body.classList.toggle('open');
+}
+// Editor inline para el profesor
+function u2EditSection(sectionName, temaId) {
+  const t = temas.find(x => x.id === temaId);
+  if(!t){ toast('Tema no encontrado'); return; }
+  // Map section to field
+  const fieldMap = {
+    'contenidos': 'contenido',
+    'ejemplos': 'ejemplos',
+    'examen': 'examen'
+  };
+  const field = fieldMap[sectionName];
+  if(!field){ toast('Esta sección se edita directamente en los ejercicios'); return; }
+  openEditTema(temaId);
+  // Activate the right tab in the modal
+  setTimeout(() => {
+    const tabMap = {contenido:'teoria', ejemplos:'ejemplos', examen:'examen'};
+    const tab = tabMap[field];
+    if(tab && typeof mtTab === 'function') mtTab(tab);
+  }, 200);
 }
 
 </script>
