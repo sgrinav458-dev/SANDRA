@@ -6553,10 +6553,10 @@ function renderGeneradorHome(){
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">Dificultad</div>
           <div style="font-size:11px;color:var(--text2)">Controla qué modificadores incluye el ejercicio (descuentos, envases, devoluciones…)</div>
         </div>
-        <div style="display:flex;gap:4px;margin-left:auto">
-          <button class="gen-dif-btn ${window._genDificultad==='basico'?'on':''}" onclick="genSetDificultad('basico')">⭐ Básico</button>
-          <button class="gen-dif-btn ${window._genDificultad==='medio'?'on':''}" onclick="genSetDificultad('medio')">⭐⭐ Medio</button>
-          <button class="gen-dif-btn ${window._genDificultad==='avanzado'?'on':''}" onclick="genSetDificultad('avanzado')">⭐⭐⭐ Avanzado</button>
+        <div style="display:flex;gap:4px;margin-left:auto" id="gen-dif-btns">
+          <button class="gen-dif-btn" id="gen-dif-basico" onclick="genSetDificultad('basico')">⭐ Básico</button>
+          <button class="gen-dif-btn" id="gen-dif-medio" onclick="genSetDificultad('medio')">⭐⭐ Medio</button>
+          <button class="gen-dif-btn" id="gen-dif-avanzado" onclick="genSetDificultad('avanzado')">⭐⭐⭐ Avanzado</button>
         </div>
       </div>
       
@@ -6574,6 +6574,12 @@ function renderGeneradorHome(){
   
   html += `</div></div>`;
   document.getElementById('view-generador').innerHTML = html;
+  // Set active dificultad button
+  var dif = window._genDificultad || 'medio';
+  ['basico','medio','avanzado'].forEach(function(d){
+    var btn = document.getElementById('gen-dif-'+d);
+    if(btn) btn.classList.toggle('on', d === dif);
+  });
 }
 
 function genIniciarEjercicio(plantillaId, dificultad){
@@ -7319,7 +7325,11 @@ function genCtaSeleccionar(codigo, nombre, ai, li){
 
 function genSetDificultad(dif){
   window._genDificultad = dif;
-  renderGeneradorHome();
+  // Update button states without re-rendering the whole home
+  ['basico','medio','avanzado'].forEach(function(d){
+    var btn = document.getElementById('gen-dif-'+d);
+    if(btn) btn.classList.toggle('on', d === dif);
+  });
 }
 
 
