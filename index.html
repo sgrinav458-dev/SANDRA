@@ -1277,6 +1277,41 @@ select.form-control{cursor:pointer}
 
 
 <script>
+
+/* ════════════════════════════════════════════════════════
+   AUTH + ALUMNOS SYSTEM
+════════════════════════════════════════════════════════ */
+
+/* ── Storage helpers ── */
+function getProfesorPass(){ return localStorage.getItem('tdc_prof_pass')||'profesor123'; }
+function getCodigoClase(){ return localStorage.getItem('tdc_codigo_clase')||'CONTA2026'; }
+function setCodigoClase(c){ localStorage.setItem('tdc_codigo_clase', c.toUpperCase()); }
+
+/* ── Alumnos registry ── */
+function getAlumnos(){ return JSON.parse(localStorage.getItem('tdc_alumnos')||'[]'); }
+function saveAlumnos(arr){ localStorage.setItem('tdc_alumnos', JSON.stringify(arr)); }
+function getOrCreateAlumno(nombre, codigo){
+  let alumnos = getAlumnos();
+  let alu = alumnos.find(a => a.nombre.toLowerCase() === nombre.toLowerCase() && a.codigo === codigo);
+  if(!alu){
+    alu = {
+      id: Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+      nombre: nombre,
+      codigo: codigo,
+      joinedAt: Date.now(),
+      lastSeen: Date.now(),
+      completedTemas: [],
+      completedActs: [],
+      pendientes: []
+    };
+    alumnos.push(alu);
+    saveAlumnos(alumnos);
+  } else {
+    alu.lastSeen = Date.now();
+    saveAlumnos(alumnos);
+  }
+  return alu;
+}
 function updateAlumnoLastSeen(id){
   const alumnos = getAlumnos();
   const a = alumnos.find(x=>x.id===id);
