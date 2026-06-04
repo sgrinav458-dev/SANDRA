@@ -3937,12 +3937,15 @@ function stringSimilarity(a,b){
   return inter*2/(A.size+B.size)||0;
 }
 
-/* ── Inicialización ── */
-updateAsientoCnt();
-
-renderTemasSidebar();
-updateCounts();
-renderInicio();
+/* ── Inicialización (protegida — solo si las funciones y datos están listos) ── */
+try {
+  if(typeof updateAsientoCnt === 'function') updateAsientoCnt();
+  if(typeof renderTemasSidebar === 'function') renderTemasSidebar();
+  if(typeof getAlumnos === 'function' && typeof updateCounts === 'function') updateCounts();
+  if(typeof renderInicio === 'function') renderInicio();
+} catch(e) {
+  console.log('[init] Render diferido hasta login:', e.message);
+}
 
 /* INIT */
 
