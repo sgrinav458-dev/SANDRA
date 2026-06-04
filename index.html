@@ -630,6 +630,653 @@ select.form-control{cursor:pointer}
 .lm-empty{text-align:center;padding:40px;color:var(--text3);font-size:14px}
 .lm-ok{background:#dcfce7;color:#15803d;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
 .lm-ko{background:#fee2e2;color:#dc2626;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     PANTALLA DE LOGIN
+══════════════════════════════════════ -->
+<div class="screen" id="screen-login" style="display:none">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">📚</div>
+      <div class="login-logo-title">TDC LMS 0443</div>
+      <div class="login-logo-sub">Tratamiento de la Documentación Contable</div>
+    </div>
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="switchLoginTab('alumno')">Soy alumno</button>
+      <button class="login-tab" onclick="switchLoginTab('profesor')">Soy profesor</button>
+    </div>
+
+    <!-- FORMULARIO ALUMNO -->
+    <div class="login-form active" id="lf-alumno">
+      <div id="lf-alumno-error" class="lf-error"></div>
+      <div class="lf-group">
+        <label class="lf-label">Nombre completo</label>
+        <input class="lf-input" id="alu-nombre" placeholder="Tu nombre y apellidos" autocomplete="name">
+      </div>
+      <div class="lf-group">
+        <label class="lf-label">Código de clase</label>
+        <input class="lf-input" id="alu-codigo" placeholder="Ej: CONTA2026" style="text-transform:uppercase" autocomplete="off" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="lf-group">
+        <label class="lf-label">Contraseña (opcional)</label>
+        <input class="lf-input" id="alu-pass" type="password" placeholder="Si el profesor la ha configurado">
+      </div>
+      <button class="lf-btn" onclick="loginAlumno()">Entrar al aula →</button>
+      <div class="lf-hint">El código de clase te lo proporciona tu profesor.<br>Si es tu primera vez, se creará tu perfil automáticamente.</div>
+    </div>
+
+    <!-- FORMULARIO PROFESOR -->
+    <div class="login-form" id="lf-profesor">
+      <div id="lf-prof-error" class="lf-error"></div>
+      <div class="lf-group">
+        <label class="lf-label">Contraseña de profesor</label>
+        <input class="lf-input" id="prof-pass" type="password" placeholder="Contraseña de acceso" onkeydown="if(event.key==='Enter')loginProfesor()">
+      </div>
+      <button class="lf-btn" onclick="loginProfesor()">Acceder como profesor →</button>
+      <div class="lf-hint">Contraseña por defecto: <strong>profesor123</strong><br>Cámbiala desde el panel de configuración.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PANTALLA DE APLICACIÓN
+══════════════════════════════════════ -->
+<div class="screen" id="screen-app">
+
+  <!-- SIDEBAR -->
+  <aside class="app-sidebar" id="app-sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-title">📚 TDC LMS 0443</div>
+      <div class="sb-brand-sub">Módulo 0443 · Gestión Administrativa<br>Junta de Andalucía</div>
+    </div>
+
+    <!-- Nav profesor -->
+    <div id="sb-nav-profesor" style="display:none">
+      <div class="sb-section-label">Módulos</div>
+      <button class="sb-nav-item active" id="sb-inicio" onclick="showTab('inicio')">
+        <span class="sb-nav-icon">🏠</span> Inicio
+      </button>
+      <button class="sb-nav-item" id="sb-calendario" onclick="showTab('calendario')">
+        <span class="sb-nav-icon">📅</span> Calendario
+      </button>
+      <button class="sb-nav-item" id="sb-contenidos" onclick="showTab('contenidos')">
+        <span class="sb-nav-icon">📖</span> Temas <span class="sb-nav-cnt" id="cnt-temas">0</span>
+      </button>
+      <button class="sb-nav-item" id="sb-actividades" onclick="showTab('actividades')">
+        <span class="sb-nav-icon">📋</span> Actividades <span class="sb-nav-cnt" id="cnt-act">0</span>
+      </button>
+
+
+      <button class="sb-nav-item" id="sb-recursos" onclick="showTab('recursos')">
+        <span class="sb-nav-icon">📁</span> Recursos <span class="sb-nav-cnt" id="cnt-rec">0</span>
+      </button>
+      <div class="sb-divider"></div>
+      <div class="sb-section-label">Profesor</div>
+      <button class="sb-nav-item" id="sb-alumnos" onclick="showTab('alumnos')">
+        <span class="sb-nav-icon">👥</span> Mis Alumnos <span class="sb-nav-cnt" id="cnt-alumnos">0</span>
+      </button>
+      <button class="sb-nav-item" id="sb-ra-ce" onclick="showTab('ra-ce')">
+        <span class="sb-nav-icon">🎯</span> RA &amp; CE
+      </button>
+
+      <button class="sb-nav-item" id="sb-vista-alumno" onclick="toggleVistaAlumno()" title="Ver la app como la ve un alumno" style="background:linear-gradient(135deg,#dbeafe,#ede9fe);color:#1e40af;font-weight:600;border:1px solid #93c5fd;margin:6px 0;border-radius:8px">
+        <span class="sb-nav-icon">👁️</span> Vista alumno
+      </button>
+
+      <div class="sb-section-label">Herramientas</div>
+      <button class="sb-nav-item" onclick="showGenerador()"><span class="sb-nav-icon">🎲</span> Generador</button>
+      <button class="sb-nav-item" onclick="showPlanCuentas()">
+        <span class="sb-nav-icon">📑</span> Plan de Cuentas
+      </button>
+      <button class="sb-nav-item" onclick="showModelosFiscales()">
+        <span class="sb-nav-icon">🏛️</span> Modelos Fiscales
+      </button>
+    </div>
+
+    <!-- Nav alumno -->
+    <div id="sb-nav-alumno" style="display:none">
+      <div class="sb-section-label">Módulos</div>
+      <button class="sb-nav-item active" id="sb-alu-inicio" onclick="showTabAlumno('alu-inicio')">
+        <span class="sb-nav-icon">🏠</span> Mi Inicio
+      </button>
+      <button class="sb-nav-item" id="sb-alu-calendario" onclick="showTabAlumno('alu-calendario')">
+        <span class="sb-nav-icon">📅</span> Calendario
+      </button>
+      <button class="sb-nav-item" id="sb-alu-contenidos" onclick="showTabAlumno('alu-contenidos')">
+        <span class="sb-nav-icon">📖</span> Temas
+      </button>
+      <button class="sb-nav-item" id="sb-alu-actividades" onclick="showTabAlumno('alu-actividades')">
+        <span class="sb-nav-icon">📋</span> Actividades
+      </button>
+      <button class="sb-nav-item" id="sb-alu-asientos" onclick="showTabAlumno('alu-asientos')">
+        <span class="sb-nav-icon">⚖️</span> Asientos
+      </button>
+
+      <button class="sb-nav-item" id="sb-alu-progreso" onclick="showTabAlumno('alu-progreso')">
+        <span class="sb-nav-icon">📊</span> Mi Progreso
+      </button>
+      <div class="sb-divider"></div>
+      <div class="sb-section-label">Herramientas</div>
+      
+      <button class="sb-nav-item" onclick="showPlanCuentas()">
+        <span class="sb-nav-icon">📑</span> Plan de Cuentas
+      </button>
+      <button class="sb-nav-item" onclick="showModelosFiscales()">
+        <span class="sb-nav-icon">🏛️</span> Modelos Fiscales
+      </button>
+    </div>
+
+    <div class="sb-user" id="sb-user-block">
+      <div class="sb-user-avatar" id="sb-user-avatar">?</div>
+      <div>
+        <div class="sb-user-name" id="sb-user-name">Usuario</div>
+        <div class="sb-user-role" id="sb-user-role">ROL</div>
+      </div>
+      <button class="sb-logout" onclick="sbSignOut()" title="Cerrar sesión">⏏</button>
+    </div>
+  </aside>
+
+  <!-- CUERPO PRINCIPAL -->
+  <div class="app-body">
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Inicio</div>
+      <div class="topbar-actions">
+        <div id="topbar-clase-wrap" style="display:none">
+          <div class="code-clase-pill" onclick="cambiarCodigoClase()">
+            Código de clase: <strong id="topbar-codigo-clase">—</strong>
+          </div>
+        </div>
+        <div id="topbar-alumnos-online" style="font-size:12px;color:var(--text2)"></div>
+      </div>
+    </div>
+
+    <!-- VISTAS PROFESOR -->
+    <div id="views-profesor" style="display:none">
+
+      <!-- INICIO -->
+      <div class="view-area" id="view-inicio" style="display:none">
+        <div class="page-hdr-row">
+          <div class="page-hdr">
+            <h1>Inicio</h1>
+            <p>Módulo 0443 · Tratamiento de la Documentación Contable · CFGM Gestión Administrativa · Andalucía</p>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box"><div class="stat-num" id="st-temas">0</div><div class="stat-lbl">Temas</div></div>
+          <div class="stat-box"><div class="stat-num" id="st-act">0</div><div class="stat-lbl">Actividades</div></div>
+          <div class="stat-box"><div class="stat-num" id="st-rec">0</div><div class="stat-lbl">Recursos</div></div>
+          <div class="stat-box"><div class="stat-num" id="st-alumnos">0</div><div class="stat-lbl">Alumnos</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span style="font-size:18px">🚀</span><div><div style="font-weight:600;font-size:14px">Acciones rápidas</div></div></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+              <button class="btn btn-primary" onclick="openNewTema()" style="justify-content:center">📖 Nuevo tema</button>
+              <button class="btn" onclick="openNewActivity()" style="justify-content:center">📋 Nueva actividad</button>
+              <button class="btn" onclick="openNewResource()" style="justify-content:center">📁 Nuevo recurso</button>
+
+
+              <button class="btn" onclick="showTab('alumnos')" style="justify-content:center">👥 Ver alumnos</button>
+              <button class="btn" onclick="showPlanCuentas()" style="justify-content:center">📑 Plan de Cuentas</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span style="font-size:16px">📊</span><div style="flex:1"><div style="font-weight:600">Cobertura por RA</div></div></div>
+          <div class="card-body" id="coverage-bars"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span style="font-size:16px">📖</span><div style="flex:1"><div style="font-weight:600">Últimos temas</div></div><button class="btn btn-sm" onclick="showTab('contenidos')">Ver todos →</button></div>
+          <div class="card-body" id="recent-temas"><div class="empty"><div class="empty-icon">📖</div><h3>Sin temas</h3><p>Crea el primer tema.</p></div></div>
+        </div>
+      </div>
+
+      <!-- CALENDARIO -->
+      <div class="view-area" id="view-calendario" style="display:none">
+        <div id="cal-container"></div>
+      </div>
+
+            <!-- CONTENIDOS -->
+      <div class="view-area no-pad" id="view-contenidos" style="display:none">
+        <div class="contenidos-layout">
+          <div class="temas-panel-left">
+            <div class="temas-panel-header">
+              <div><div style="font-size:13px;font-weight:600">Unidades del módulo</div><div style="font-size:11px;color:var(--text2);margin-top:1px" id="temas-panel-cnt">0 unidades</div></div>
+              <div style="display:flex;gap:4px">
+                <button type="button" class="btn btn-xs" onclick="exportarBackup()" title="Descargar copia de seguridad">💾</button>
+                <button type="button" class="btn btn-xs" onclick="document.getElementById('import-backup').click()" title="Restaurar copia de seguridad">📥</button>
+                <input type="file" id="import-backup" style="display:none" accept=".json" onchange="importarBackup(event)">
+                <button type="button" class="btn btn-xs btn-primary" onclick="openNewTema()">+ Nueva</button>
+              </div>
+            </div>
+            <div class="temas-panel-list" id="temas-panel-list">
+              <div class="temas-panel-empty" id="temas-panel-empty">Sin unidades. Pulsa + Nueva.</div>
+            </div>
+          </div>
+          <div class="tema-detail-area" id="tema-detail-panel">
+            <div id="tema-detail-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);text-align:center;padding:40px">
+              <div style="font-size:52px;margin-bottom:14px">📖</div>
+              <div style="font-size:16px;font-weight:500;color:var(--text2);margin-bottom:6px">Selecciona una unidad</div>
+              <button type="button" class="btn btn-primary" onclick="openNewTema()">📖 Crear primera unidad</button>
+            </div>
+            <div id="tema-detail-content" style="display:none;padding:24px 28px 40px;max-width:860px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVIDADES -->
+      <div class="view-area" id="view-actividades" style="display:none">
+        <div class="section-hdr"><div><h2>Actividades</h2><p>Gestiona las actividades y vincúlalas a los RA y CE.</p></div><button class="btn btn-primary" onclick="openNewActivity()">+ Nueva actividad</button></div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+          <input class="form-control" id="search-act" placeholder="🔍 Buscar actividad..." style="max-width:210px" oninput="renderActivities()">
+          <select class="form-control" id="filter-tipo" style="max-width:160px" onchange="renderActivities()">
+            <option value="">Todos los tipos</option>
+            <option value="tarea">📝 Tarea</option>
+            <option value="quiz">📊 Cuestionario</option>
+            <option value="recurso">📄 Recurso</option>
+            <option value="foro">💬 Foro</option>
+            <option value="video">🎬 Vídeo</option>
+          </select>
+          <select class="form-control" id="filter-ra" style="max-width:130px" onchange="onFilterRaChange()">
+            <option value="">Todos los RA</option>
+            <option value="RA1">RA1</option>
+            <option value="RA2">RA2</option>
+            <option value="RA3">RA3</option>
+            <option value="RA4">RA4</option>
+          </select>
+          <select class="form-control" id="filter-ce" style="max-width:180px" onchange="renderActivities()">
+            <option value="">Todos los CE</option>
+          </select>
+          <select class="form-control" id="filter-tema-act" style="max-width:180px" onchange="renderActivities()">
+            <option value="">Todos los temas</option>
+          </select>
+          <span style="font-size:12px;color:var(--text3);margin-left:4px" id="act-count-lbl"></span>
+        </div>
+        <div id="act-list"></div>
+
+        <!-- ASIENTOS dentro de Actividades -->
+        <div style="margin-top:28px;padding-top:20px;border-top:2px solid var(--border)">
+          <div class="section-hdr" style="margin-bottom:14px">
+            <div>
+              <h2 style="font-family:'DM Serif Display',serif;font-size:20px;font-weight:400">⚖️ Ejercicios de Asientos Contables</h2>
+              <p style="font-size:12px;color:var(--text2);margin-top:3px">Ejercicios con corrección automática vinculados a las actividades del módulo</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openNewAsiento()">⚖️ Nuevo ejercicio</button>
+          </div>
+          <div id="asientos-list"></div>
+        </div>
+      </div>
+
+
+      
+
+      <!-- RECURSOS -->
+      <div class="view-area" id="view-recursos" style="display:none">
+        <div class="section-hdr"><div><h2>Recursos didácticos</h2><p>Apuntes, plantillas y materiales del módulo.</p></div><button class="btn btn-primary" onclick="openNewResource()">+ Nuevo recurso</button></div>
+        <div id="res-list"></div>
+      </div>
+
+      <!-- ALUMNOS -->
+      <div class="view-area" id="view-alumnos" style="display:none">
+        <div class="page-hdr-row" style="margin-bottom:16px">
+          <div class="page-hdr" style="margin:0">
+            <h1>Mis Alumnos</h1>
+            <p>Seguimiento individualizado del progreso de cada alumno. Haz clic en un alumno para ver su detalle.</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">
+          <div style="font-size:13px;color:var(--text2)" id="alumnos-count-lbl">0 alumno(s) registrado(s)</div>
+          <div id="alumnos-online-badge"></div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+            <div style="font-size:12px;color:var(--text2)">Cambiar código de clase:</div>
+            <input class="form-control" id="input-nuevo-codigo" style="max-width:140px;font-size:12px;text-transform:uppercase" placeholder="CONTA2026" oninput="this.value=this.value.toUpperCase()">
+            <button class="btn btn-sm btn-primary" onclick="actualizarCodigoClase()">Actualizar</button>
+          </div>
+          <div class="code-clase-pill" id="codigo-clase-pill" onclick="copiarCodigoClase()">Código de clase: <strong id="codigo-clase-display">—</strong></div>
+        </div>
+        <div class="alumno-grid" id="alumno-grid"></div>
+      </div>
+
+      <!-- RA & CE -->
+      <div class="view-area" id="view-ra-ce" style="display:none">
+        <div class="section-hdr"><div><h2>Resultados de Aprendizaje y CE</h2><p>RD 1631/2009 · Orden 21/02/2011 · BOJA núm. 55 · Junta de Andalucía</p></div></div>
+        <div id="ra-ce-list"></div>
+      </div>
+
+
+    </div>
+
+    <!-- VISTAS ALUMNO -->
+    <div id="views-alumno" style="display:none">
+      <div class="view-area" id="view-alu-inicio" style="display:none">
+        <div class="page-hdr"><h1 id="alu-bienvenida">Bienvenido</h1><p>Panel de alumno · TDC 0443</p></div>
+        <div class="stats-grid">
+          <div class="stat-box"><div class="stat-num" id="alu-temas-cnt">0</div><div class="stat-lbl">Temas disponibles</div></div>
+          <div class="stat-box"><div class="stat-num" id="alu-acts-cnt">0</div><div class="stat-lbl">Actividades</div></div>
+          <div class="stat-box"><div class="stat-num" id="alu-asientos-cnt">0</div><div class="stat-lbl">Ejercicios asientos</div></div>
+
+        </div>
+        <div class="card">
+          <div class="card-head"><span>🚀</span><div style="font-weight:600">Acceso rápido</div></div>
+          <div class="card-body" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+            <button class="btn btn-primary" onclick="showTabAlumno('alu-contenidos')" style="justify-content:center">📖 Ver temas</button>
+            <button class="btn" onclick="showTabAlumno('alu-actividades')" style="justify-content:center">📋 Mis actividades</button>
+            <button class="btn" onclick="showTabAlumno('alu-asientos')" style="justify-content:center">⚖️ Practicar asientos</button>
+
+          </div>
+        </div>
+      </div>
+      <div class="view-area no-pad" id="view-alu-contenidos" style="display:none">
+        <div class="contenidos-layout">
+          <div class="temas-panel-left">
+            <div class="temas-panel-header"><div><div style="font-size:13px;font-weight:600">Unidades del módulo</div></div></div>
+            <div class="temas-panel-list" id="alu-temas-panel-list"></div>
+          </div>
+          <div class="tema-detail-area" id="alu-tema-detail-panel">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);text-align:center;padding:40px">
+              <div style="font-size:52px;margin-bottom:14px">📖</div>
+              <div style="font-size:16px;font-weight:500;color:var(--text2)">Selecciona una unidad</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="view-area" id="view-alu-actividades" style="display:none">
+        <div class="section-hdr"><div><h2>Mis actividades</h2></div></div>
+        <div id="alu-act-list"></div>
+      </div>
+      <!-- CALENDARIO ALUMNO (solo lectura) -->
+      <div class="view-area" id="view-alu-calendario" style="display:none">
+        <div id="alu-cal-container"></div>
+      </div>
+
+      <div class="view-area" id="view-alu-asientos" style="display:none">
+        <div class="section-hdr"><div><h2>Ejercicios de asientos</h2></div></div>
+        <div id="alu-asientos-list"></div>
+      </div>
+
+      <!-- MI PROGRESO ALUMNO -->
+      <div class="view-area" id="view-alu-progreso" style="display:none">
+        <div style="margin-bottom:20px">
+          <h1 style="font-family:'DM Serif Display',serif;font-size:26px;font-weight:400">Mi Progreso</h1>
+          <span style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">RESUMEN</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px">
+          <div class="stat-box" style="text-align:center">
+            <div class="stat-num" id="prog-nota-modulo" style="color:#16a34a;font-size:32px">—</div>
+            <div class="stat-lbl">NOTA MÓDULO</div>
+          </div>
+          <div class="stat-box" style="text-align:center">
+            <div class="stat-num" id="prog-correctos" style="color:var(--accent2);font-size:32px">0</div>
+            <div class="stat-lbl">EJERCICIOS CORRECTOS</div>
+          </div>
+          <div class="stat-box" style="text-align:center">
+            <div class="stat-num" id="prog-pendientes" style="color:var(--accent2);font-size:32px">0</div>
+            <div class="stat-lbl">PENDIENTES EVALUACIÓN</div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-head"><span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">PROGRESO POR TEMA</span></div>
+          <div class="card-body" id="prog-temas-list"></div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px">
+            <h2 style="font-family:'DM Serif Display',serif;font-size:22px;font-weight:400">Mis exámenes</h2>
+            <span style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">HISTORIAL</span>
+          </div>
+          <div id="prog-examenes-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<!-- ═══ MODAL TEMA ═══ -->
+<div class="modal-bg" id="modal-tema">
+  <div class="modal modal-wide" style="max-width:780px">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Contenidos del módulo</div>
+        <h3 id="modal-tema-title">Nueva unidad didáctica</h3>
+      </div>
+      <button class="btn btn-sm" onclick="closeModal('modal-tema')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0">
+
+      <!-- TABS del modal -->
+      <div style="display:flex;border-bottom:2px solid var(--border);background:var(--surface2);padding:0 18px">
+        <button class="mt-tab active" data-mt="info" onclick="mtTab('info')">📋 Información</button>
+        <button class="mt-tab" data-mt="teoria" onclick="mtTab('teoria')">📚 Teoría</button>
+        <button class="mt-tab" data-mt="ejemplos" onclick="mtTab('ejemplos')">💡 Ejemplos</button>
+        <button class="mt-tab" data-mt="recursos" onclick="mtTab('recursos')">🎬 Recursos</button>
+        <button class="mt-tab" data-mt="examen" onclick="mtTab('examen')">📝 Examen</button>
+      </div>
+
+      <div style="padding:18px 22px;max-height:calc(90vh - 180px);overflow-y:auto">
+
+        <!-- ── PESTAÑA: INFORMACIÓN ── -->
+        <div class="mt-pane active" id="mt-pane-info">
+          <div style="display:grid;grid-template-columns:80px 1fr;gap:12px;margin-bottom:12px">
+            <div>
+              <label class="form-label">Nº</label>
+              <input class="form-control" id="tema-num" type="number" min="1" placeholder="1">
+            </div>
+            <div>
+              <label class="form-label">Título de la unidad *</label>
+              <input class="form-control" id="tema-titulo" placeholder="Ej: La actividad económica y la empresa">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descripción breve (subtítulo)</label>
+            <input class="form-control" id="tema-desc-short" placeholder="Resumen de los contenidos principales del tema">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <label class="form-label">Duración estimada</label>
+              <input class="form-control" id="tema-duracion" placeholder="Ej: 8 horas, 2 semanas">
+            </div>
+            <div>
+              <label class="form-label">Estado</label>
+              <select class="form-control" id="tema-estado">
+                <option value="publicado">✅ Publicado (visible para alumnos)</option>
+                <option value="borrador">📝 Borrador (solo profesor)</option>
+              </select>
+            </div>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:14px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:10px">🎯 Criterios de evaluación vinculados</div>
+            <div id="tema-ce-sel" class="ce-sel-grid"></div>
+          </div>
+        </div>
+
+        <!-- ── PESTAÑA: TEORÍA ── -->
+        <div class="mt-pane" id="mt-pane-teoria" style="display:none">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Contenido teórico principal del tema. El alumno lo verá en la pestaña "Teoría".</div>
+          <div class="rich-toolbar">
+            <button type="button" onclick="efmt('bold')"><b>B</b></button>
+            <button type="button" onclick="efmt('italic')"><i>I</i></button>
+            <button type="button" onclick="efmt('underline')"><u>U</u></button>
+            <button type="button" onclick="efmt('insertUnorderedList')">• Lista</button>
+            <button type="button" onclick="efmt('insertOrderedList')">1. Numerada</button>
+            <button type="button" onclick="efmtBlock('h2')">H2</button>
+            <button type="button" onclick="efmtBlock('h3')">H3</button>
+            <button type="button" onclick="efmtBlock('p')">¶ Párrafo</button>
+          </div>
+          <div class="rich-editor" id="tema-contenido" contenteditable="true" style="min-height:300px"></div>
+        </div>
+
+        <!-- ── PESTAÑA: EJEMPLOS ── -->
+        <div class="mt-pane" id="mt-pane-ejemplos" style="display:none">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Ejercicios resueltos paso a paso. El alumno los verá en la pestaña "Ejemplos".</div>
+          <div class="rich-toolbar">
+            <button type="button" onclick="efmtTarget('tema-ejemplos','bold')"><b>B</b></button>
+            <button type="button" onclick="efmtTarget('tema-ejemplos','italic')"><i>I</i></button>
+            <button type="button" onclick="efmtTarget('tema-ejemplos','underline')"><u>U</u></button>
+            <button type="button" onclick="efmtTarget('tema-ejemplos','insertUnorderedList')">• Lista</button>
+            <button type="button" onclick="efmtTarget('tema-ejemplos','insertOrderedList')">1. Numerada</button>
+            <button type="button" onclick="efmtTargetBlock('tema-ejemplos','h3')">H3</button>
+            <button type="button" onclick="efmtTargetBlock('tema-ejemplos','p')">¶ Párrafo</button>
+          </div>
+          <div class="rich-editor" id="tema-ejemplos" contenteditable="true" style="min-height:300px"></div>
+        </div>
+
+        <!-- ── PESTAÑA: RECURSOS ── -->
+        <div class="mt-pane" id="mt-pane-recursos" style="display:none">
+
+          <!-- Vídeos -->
+          <div style="margin-bottom:20px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <div>
+                <div style="font-size:13px;font-weight:600">🎬 Vídeos</div>
+                <div style="font-size:11px;color:var(--text2)">YouTube, Vimeo o cualquier URL de vídeo</div>
+              </div>
+              <button class="btn btn-xs btn-primary" type="button" onclick="temaAddVideo()">+ Añadir vídeo</button>
+            </div>
+            <div id="tema-videos-list"></div>
+          </div>
+
+          <!-- Diapositivas / Presentaciones -->
+          <div style="margin-bottom:20px;padding-top:16px;border-top:1px solid var(--border)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <div>
+                <div style="font-size:13px;font-weight:600">📊 Presentaciones y documentos</div>
+                <div style="font-size:11px;color:var(--text2)">Google Slides, Canva, PDF, Genially, etc.</div>
+              </div>
+              <button class="btn btn-xs btn-primary" type="button" onclick="temaAddSlide()">+ Añadir recurso</button>
+            </div>
+            <div id="tema-slides-list"></div>
+          </div>
+
+          <!-- Consejo -->
+          <div style="background:#fff8e1;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:11px;color:#7a5000">
+            💡 <strong>Cómo insertar presentaciones de Google Slides:</strong><br>
+            En Google Slides → Archivo → Publicar en la web → Insertar → copia el enlace e incluye el parámetro <code>?embedded=true</code>. Pégalo en el campo URL.
+          </div>
+        </div>
+
+        <!-- ── PESTAÑA: EXAMEN ── -->
+        <div class="mt-pane" id="mt-pane-examen" style="display:none">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Bases del examen, criterios de evaluación, fechas y modelo de prueba. El alumno lo verá en la pestaña "Examen".</div>
+          <div class="rich-toolbar">
+            <button type="button" onclick="efmtTarget('tema-examen','bold')"><b>B</b></button>
+            <button type="button" onclick="efmtTarget('tema-examen','italic')"><i>I</i></button>
+            <button type="button" onclick="efmtTarget('tema-examen','underline')"><u>U</u></button>
+            <button type="button" onclick="efmtTarget('tema-examen','insertUnorderedList')">• Lista</button>
+            <button type="button" onclick="efmtTarget('tema-examen','insertOrderedList')">1. Numerada</button>
+            <button type="button" onclick="efmtTargetBlock('tema-examen','h3')">H3</button>
+            <button type="button" onclick="efmtTargetBlock('tema-examen','p')">¶ Párrafo</button>
+          </div>
+          <div class="rich-editor" id="tema-examen" contenteditable="true" style="min-height:200px"></div>
+          <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <label class="form-label">Fecha del examen</label>
+              <input class="form-control" id="tema-fecha-examen" type="date">
+            </div>
+            <div>
+              <label class="form-label">Duración del examen</label>
+              <input class="form-control" id="tema-duracion-examen" placeholder="Ej: 1 hora 30 minutos">
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end scroll -->
+    </div><!-- end modal-body -->
+
+    <div class="modal-foot">
+      <button class="btn" type="button" onclick="closeModal('modal-tema')">Cancelar</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" type="button" onclick="saveTema()">💾 Guardar unidad</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ MODAL VER TEMA ═══ -->
+<div class="modal-bg" id="modal-view-tema">
+  <div class="modal modal-wide">
+    <div class="modal-head">
+      <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px" id="view-tema-num-lbl"></div><h3 id="view-tema-titulo"></h3></div>
+      <div style="display:flex;gap:6px"><button class="btn btn-sm btn-primary" id="view-tema-edit-btn">✏️ Editar</button><button class="btn btn-sm" onclick="closeModal('modal-view-tema')">✕</button></div>
+    </div>
+    <div class="modal-body" id="view-tema-body"></div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal('modal-view-tema')">Cerrar</button></div>
+  </div>
+</div>
+
+<!-- ═══ MODAL ACTIVIDAD ═══ -->
+<div class="modal-bg" id="modal-activity">
+  <div class="modal">
+    <div class="modal-head"><h3 id="modal-act-title">Nueva actividad</h3><button class="btn btn-sm" onclick="closeModal('modal-activity')">✕</button></div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group" style="grid-column:1/-1"><label class="form-label">Título *</label><input class="form-control" id="act-titulo" placeholder="Ej: Práctica asientos compra-venta"></div>
+        <div class="form-group"><label class="form-label">Tipo</label><select class="form-control" id="act-tipo"><option value="tarea">📝 Tarea</option><option value="quiz">📊 Cuestionario</option><option value="recurso">📄 Recurso</option><option value="foro">💬 Foro</option><option value="video">🎬 Vídeo</option></select></div>
+        <div class="form-group"><label class="form-label">Fecha límite</label><input class="form-control" id="act-fecha" type="date"></div>
+        <div class="form-group"><label class="form-label">Tema asociado</label><select class="form-control" id="act-tema"><option value="">Sin tema</option></select></div>
+        <div class="form-group"><label class="form-label">Puntuación máx.</label><input class="form-control" id="act-puntos" type="number" min="0" placeholder="10"></div>
+        <div class="form-group" style="grid-column:1/-1"><label class="form-label">Descripción</label><textarea class="form-control" id="act-desc" rows="3" placeholder="Instrucciones, criterios..."></textarea></div>
+        <div class="form-group" style="grid-column:1/-1"><label class="form-label">URL</label><input class="form-control" id="act-url" placeholder="https://..."></div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:2px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div>
+            <div style="font-size:13px;font-weight:600">🎯 Vincular a RA y CE</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">Selecciona los Resultados de Aprendizaje y Criterios de Evaluación que trabaja esta actividad</div>
+          </div>
+          <div id="act-ce-resumen" style="font-size:11px;color:var(--accent2);font-weight:600;background:var(--accent-l);padding:3px 9px;border-radius:10px;display:none"></div>
+        </div>
+        <div id="act-ce-sel"></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal('modal-activity')">Cancelar</button><button class="btn btn-primary" onclick="saveActivity()">💾 Guardar</button></div>
+  </div>
+</div>
+
+<!-- ═══ MODAL RECURSO ═══ -->
+<div class="modal-bg" id="modal-resource">
+  <div class="modal modal-wide">
+    <div class="modal-head"><h3 id="modal-res-title">Nuevo recurso</h3><button class="btn btn-sm" onclick="closeModal('modal-resource')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Título *</label><input class="form-control" id="res-titulo" placeholder="Ej: Apuntes PGC de Pymes"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:4px">
+        <div class="form-group"><label class="form-label">Tipo</label><select class="form-control" id="res-tipo"><option value="apuntes">📄 Apuntes</option><option value="plantilla">📊 Plantilla</option><option value="enlace">🔗 Enlace web</option><option value="video">🎬 Vídeo</option><option value="enunciado">📝 Enunciado</option><option value="solucion">✅ Solución</option></select></div>
+        <div class="form-group"><label class="form-label">Tema asociado</label><select class="form-control" id="res-tema"><option value="">Sin tema</option></select></div>
+        <div class="form-group"><label class="form-label">URL</label><input class="form-control" id="res-url" placeholder="https://..."></div>
+      </div>
+      <div class="form-group"><label class="form-label">Descripción / Contenido</label><textarea class="form-control" id="res-desc" rows="3" placeholder="Texto o descripción del recurso..."></textarea></div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:2px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div>
+            <div style="font-size:13px;font-weight:600">🎯 Vincular a RA y CE</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">Selecciona los Resultados de Aprendizaje y Criterios de Evaluación que cubre este recurso</div>
+          </div>
+          <div id="res-ce-resumen" style="font-size:11px;color:var(--accent2);font-weight:600;background:var(--accent-l);padding:3px 9px;border-radius:10px;display:none"></div>
+        </div>
+        <div id="res-ce-sel"></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal('modal-resource')">Cancelar</button><button class="btn btn-primary" onclick="saveResource()">💾 Guardar</button></div>
+  </div>
+</div>
+
+<!-- ═══ MODAL VER ACTIVIDAD ═══ -->
+<div class="modal-bg" id="modal-view-act">
+  <div class="modal">
+    <div class="modal-head"><h3 id="view-act-titulo" style="max-width:480px"></h3><div style="display:flex;gap:6px"><button class="btn btn-sm btn-primary" id="view-act-edit-btn">✏️ Editar</button><button class="btn btn-sm" onclick="closeModal('modal-view-act')">✕</button></div></div>
+    <div class="modal-body" id="view-act-body"></div>
+    <div class="modal-foot"><button class="btn" onclick="closeModal('modal-view-act')">Cerrar</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+
+<script>
 function updateAlumnoLastSeen(id){
   const alumnos = getAlumnos();
   const a = alumnos.find(x=>x.id===id);
@@ -8148,43 +8795,8 @@ function asiVista(id, vista){
   if(vista === 'libroMayor') abrirLibroMayor(ejId, 'mayor');
   else if(vista === 'cuentasAnuales') abrirLibroMayor(ejId, 'balance');
 }
-
-// Editor inline para el profesor
-function u2EditSection(sectionName, temaId) {
-  const t = temas.find(x => x.id === temaId);
-  if(!t){ toast('Tema no encontrado'); return; }
-  // Map section to field
-  const fieldMap = {
-    'contenidos': 'contenido',
-    'ejemplos': 'ejemplos',
-    'examen': 'examen'
-  };
-  const field = fieldMap[sectionName];
-  if(!field){ toast('Esta sección se edita directamente en los ejercicios'); return; }
-  openEditTema(temaId);
-  // Activate the right tab in the modal
-  setTimeout(() => {
-    const tabMap = {contenido:'teoria', ejemplos:'ejemplos', examen:'examen'};
-    const tab = tabMap[field];
-    if(tab && typeof mtTab === 'function') mtTab(tab);
-  }, 200);
-}
-
-
 </script>
-</div>`;
 
-/* Inyectar contenido U2 en el tema num=2 cuando se carga */
-function injectU2Content() {
-  if(typeof temas === 'undefined') return;
-  const t2 = temas.find(t => t.num === 2);
-  if(t2 && !t2.contenido_html) {
-    t2.contenido_html = U2_CONTENIDO_HTML;
-  }
-}
-
-
-</script>
 
 <!-- ═══ MODAL PLAN DE CUENTAS ═══ -->
 <div class="modal-bg" id="modal-plan-cuentas">
@@ -9074,6 +9686,5 @@ function injectU2Content() {
     </div>
   </div>
 </div>
-
 </body>
 </html>
