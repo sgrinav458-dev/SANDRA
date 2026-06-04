@@ -1124,6 +1124,36 @@ select.form-control{cursor:pointer}
           <div class="rich-editor" id="tema-ejemplos" contenteditable="true" style="min-height:300px"></div>
         </div>
 
+        <!-- ── PESTAÑA: APRENDIZAJE ── -->
+        <div class="mt-pane" id="mt-pane-aprendizaje" style="display:none">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Actividades de práctica. El alumno las verá en la pestaña "Actividades de aprendizaje".</div>
+          <div class="rich-toolbar">
+            <button type="button" onclick="efmtTarget('tema-aprendizaje','bold')"><b>B</b></button>
+            <button type="button" onclick="efmtTarget('tema-aprendizaje','italic')"><i>I</i></button>
+            <button type="button" onclick="efmtTarget('tema-aprendizaje','underline')"><u>U</u></button>
+            <button type="button" onclick="efmtTarget('tema-aprendizaje','insertUnorderedList')">• Lista</button>
+            <button type="button" onclick="efmtTarget('tema-aprendizaje','insertOrderedList')">1. Numerada</button>
+            <button type="button" onclick="efmtTargetBlock('tema-aprendizaje','h3')">H3</button>
+            <button type="button" onclick="efmtTargetBlock('tema-aprendizaje','p')">¶ Párrafo</button>
+          </div>
+          <div class="rich-editor" id="tema-aprendizaje" contenteditable="true" style="min-height:300px"></div>
+        </div>
+
+        <!-- ── PESTAÑA: EVALUABLES ── -->
+        <div class="mt-pane" id="mt-pane-evaluables" style="display:none">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Actividades evaluables (cuentan para la nota). El alumno las verá en la pestaña "Actividades evaluables".</div>
+          <div class="rich-toolbar">
+            <button type="button" onclick="efmtTarget('tema-evaluables','bold')"><b>B</b></button>
+            <button type="button" onclick="efmtTarget('tema-evaluables','italic')"><i>I</i></button>
+            <button type="button" onclick="efmtTarget('tema-evaluables','underline')"><u>U</u></button>
+            <button type="button" onclick="efmtTarget('tema-evaluables','insertUnorderedList')">• Lista</button>
+            <button type="button" onclick="efmtTarget('tema-evaluables','insertOrderedList')">1. Numerada</button>
+            <button type="button" onclick="efmtTargetBlock('tema-evaluables','h3')">H3</button>
+            <button type="button" onclick="efmtTargetBlock('tema-evaluables','p')">¶ Párrafo</button>
+          </div>
+          <div class="rich-editor" id="tema-evaluables" contenteditable="true" style="min-height:300px"></div>
+        </div>
+
         <!-- ── PESTAÑA: RECURSOS ── -->
         <div class="mt-pane" id="mt-pane-recursos" style="display:none">
 
@@ -2037,6 +2067,10 @@ function openNewTema(){
   document.getElementById('tema-contenido').innerHTML='';
   var ejEl2 = document.getElementById('tema-ejemplos');
   if(ejEl2) ejEl2.innerHTML='';
+  var apEl2 = document.getElementById('tema-aprendizaje');
+  if(apEl2) apEl2.innerHTML='';
+  var evEl2 = document.getElementById('tema-evaluables');
+  if(evEl2) evEl2.innerHTML='';
   var exEl2 = document.getElementById('tema-examen');
   if(exEl2) exEl2.innerHTML='';
   document.getElementById('tema-duracion').value='';
@@ -2056,6 +2090,10 @@ function openEditTema(id){
   document.getElementById('tema-contenido').innerHTML=t.contenido||'';
   var ejEl = document.getElementById('tema-ejemplos');
   if(ejEl) ejEl.innerHTML=t.ejemplos||'';
+  var apEl = document.getElementById('tema-aprendizaje');
+  if(apEl) apEl.innerHTML=t.aprendizaje||'';
+  var evEl = document.getElementById('tema-evaluables');
+  if(evEl) evEl.innerHTML=t.evaluables||'';
   var exEl = document.getElementById('tema-examen');
   if(exEl) exEl.innerHTML=t.examen||'';
   document.getElementById('tema-duracion').value=t.duracion||'';
@@ -2091,6 +2129,8 @@ function saveTema(){
     descShort:document.getElementById('tema-desc-short').value,
     contenido:document.getElementById('tema-contenido')?.innerHTML||'',
     ejemplos:document.getElementById('tema-ejemplos')?.innerHTML||'',
+    aprendizaje:document.getElementById('tema-aprendizaje')?.innerHTML||'',
+    evaluables:document.getElementById('tema-evaluables')?.innerHTML||'',
     examen:document.getElementById('tema-examen')?.innerHTML||'',
     duracion:document.getElementById('tema-duracion').value,
     ce:getSelCe('tema-ce-sel'),
@@ -5140,24 +5180,34 @@ function ttFolder(temaId, tab){
   }
   
   else if(tab === 'ejemplos'){
-    let html = `<div class="ft-panel-hint">Ejemplos de asientos resueltos por el profesor. Vista en libro diario.</div>`;
+    const hasHtml = t.ejemplos && t.ejemplos.trim();
+    let html = `<div class="ft-panel-hint">Ejemplos de asientos resueltos por el profesor.${isProf?' <span style="color:#2563eb;cursor:pointer" onclick="openEditTema(\''+temaId+'\')">[ ✏️ Editar ]</span>':''}</div>`;
+    // Contenido HTML del tema (generado/pegado en el editor)
+    if(hasHtml){
+      html += '<div class="tema-view-content" style="margin-bottom:24px">' + t.ejemplos + '</div>';
+    }
+    // Ejercicios de la tabla asientos
     if(ejEjemplos.length){
       ejEjemplos.forEach((e,i) => { html += renderEjercicioCard(e, i+1, 'ejemplo', isProf, false); });
-    } else {
+    } else if(!hasHtml){
       html += emptyState('💡','Sin ejemplos','El profesor publicará aquí ejercicios resueltos como guía.',
         `<button class="btn btn-sm btn-primary" onclick="openNewEjercicio('${temaId}','ejemplo')">+ Añadir ejemplo</button>`);
     }
-    if(isProf && ejEjemplos.length){
-      html += `<div style="text-align:center;margin-top:14px"><button class="btn btn-sm btn-primary" onclick="openNewEjercicio('${temaId}','ejemplo')">+ Añadir ejemplo</button></div>`;
+    if(isProf){
+      html += `<div style="text-align:center;margin-top:14px"><button class="btn btn-sm btn-primary" onclick="openNewEjercicio('${temaId}','ejemplo')">+ Añadir ejercicio interactivo</button></div>`;
     }
     panel.innerHTML = html;
   }
   
   else if(tab === 'aprendizaje'){
-    let html = `<div class="ft-panel-hint">Ejercicios de práctica. Resuelve los asientos en libro diario y comprueba al instante.</div>`;
+    const hasHtml = t.aprendizaje && t.aprendizaje.trim();
+    let html = `<div class="ft-panel-hint">Ejercicios de práctica.${isProf?' <span style="color:#2563eb;cursor:pointer" onclick="openEditTema(\''+temaId+'\')">[ ✏️ Editar ]</span>':''}</div>`;
+    if(hasHtml){
+      html += '<div class="tema-view-content" style="margin-bottom:24px">' + t.aprendizaje + '</div>';
+    }
     if(ejAprendizaje.length){
       ejAprendizaje.forEach((e,i) => { html += renderEjercicioCard(e, i+1, 'aprendizaje', isProf, !isProf); });
-    } else {
+    } else if(!hasHtml){
       html += emptyState('📋','Sin actividades de aprendizaje','Ejercicios de práctica sin nota para asimilar el tema.',
         `<button class="btn btn-sm btn-primary" onclick="openNewEjercicio('${temaId}','aprendizaje')">+ Nueva actividad</button>`);
     }
@@ -5170,10 +5220,15 @@ function ttFolder(temaId, tab){
   else if(tab === 'evaluables'){
     // Combine manual evaluables + generated evaluables for this tema
     const evGen = (_evGenActividades||[]).filter(a => a.tema_id === temaId);
+    const hasHtml = t.evaluables && t.evaluables.trim();
     
-    let html = `<div class="ft-panel-hint">Actividades con puntuación. La nota se guarda automáticamente.</div>`;
+    let html = `<div class="ft-panel-hint">Actividades con puntuación.${isProf?' <span style="color:#2563eb;cursor:pointer" onclick="openEditTema(\''+temaId+'\')">[ ✏️ Editar ]</span>':''}</div>`;
     
-    if(!ejEvaluables.length && !evGen.length){
+    if(hasHtml){
+      html += '<div class="tema-view-content" style="margin-bottom:24px">' + t.evaluables + '</div>';
+    }
+    
+    if(!ejEvaluables.length && !evGen.length && !hasHtml){
       html += emptyState('⭐','Sin actividades evaluables','Crea actividades manuales o automáticas (generadas con ejercicios aleatorios por alumno).',
         `<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
           <button class="btn btn-sm btn-primary" onclick="openNewEjercicio('${temaId}','evaluable')">+ Manual</button>
@@ -5197,15 +5252,19 @@ function ttFolder(temaId, tab){
   }
   
   else if(tab === 'examen'){
-    let html = `<div class="ft-panel-hint">Ejercicios del examen del tema. Las respuestas se guardan al completarlas.</div>`;
+    const hasHtml = t.examen && t.examen.trim();
+    let html = `<div class="ft-panel-hint">Examen del tema.${isProf?' <span style="color:#2563eb;cursor:pointer" onclick="openEditTema(\''+temaId+'\')">[ ✏️ Editar ]</span>':''}</div>`;
+    if(hasHtml){
+      html += '<div class="tema-view-content" style="margin-bottom:24px">' + t.examen + '</div>';
+    }
     if(ejExamen.length){
       ejExamen.forEach((e,i) => { html += renderEjercicioCard(e, i+1, 'examen', isProf, !isProf); });
-    } else {
+    } else if(!hasHtml){
       html += emptyState('📝','Sin ejercicios de examen','Ejercicios que conformarán el examen del tema.',
         `<button class="btn btn-sm btn-primary" onclick="openNewEjercicio('${temaId}','examen')">+ Añadir ejercicio</button>`);
     }
-    if(isProf && ejExamen.length){
-      html += `<div style="text-align:center;margin-top:14px"><button class="btn btn-sm btn-primary" onclick="openNewEjercicio('${temaId}','examen')">+ Añadir ejercicio</button></div>`;
+    if(isProf){
+      html += `<div style="text-align:center;margin-top:14px"><button class="btn btn-sm btn-primary" onclick="openNewEjercicio('${temaId}','examen')">+ Añadir ejercicio interactivo</button></div>`;
     }
     panel.innerHTML = html;
   }
@@ -6232,6 +6291,8 @@ async function loadAllFromSupabase(){
       descShort: t.desc_short || '',
       contenido: t.contenido || '',
       ejemplos: t.ejemplos || '',
+      aprendizaje: t.aprendizaje || '',
+      evaluables: t.evaluables || '',
       examen: t.examen || '',
       duracion: t.duracion || '',
       ce: t.ce || [],
@@ -6317,8 +6378,9 @@ async function sbUpsertTema(t){
     id: t.id, num: t.num, titulo: t.titulo,
     desc_short: t.descShort,
     contenido: t.contenido || '',
-    contenido_html: t.contenido_html || '',
     ejemplos: t.ejemplos || '',
+    aprendizaje: t.aprendizaje || '',
+    evaluables: t.evaluables || '',
     examen: t.examen || '',
     duracion: t.duracion || '',
     ce: t.ce || [],
