@@ -630,6 +630,23 @@ select.form-control{cursor:pointer}
 .lm-empty{text-align:center;padding:40px;color:var(--text3);font-size:14px}
 .lm-ok{background:#dcfce7;color:#15803d;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
 .lm-ko{background:#fee2e2;color:#dc2626;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
+
+/* === RÚBRICAS === */
+.rubrica-card{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px}
+.rubrica-card-head{display:flex;align-items:flex-start;justify-content:space-between;padding:14px 18px;background:var(--surface2)}
+.rubrica-criterios{padding:10px 18px;border-top:1px solid var(--border)}
+.rubrica-criterio-row{display:flex;align-items:center;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+.rubrica-criterio-row:last-child{border-bottom:none}
+.rubrica-criterio-edit{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px}
+
+/* === CORRECCIÓN === */
+.correccion-card{background:#fff;border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden}
+.correccion-head{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.correccion-body{padding:16px 18px}
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700}
+.badge-success{background:#dcfce7;color:#15803d}
+.badge-warning{background:#fef9c3;color:#854d0e}
+.badge-info{background:#dbeafe;color:#1e40af}
 </style>
 </head>
 <body>
@@ -721,6 +738,9 @@ select.form-control{cursor:pointer}
       <button class="sb-nav-item" id="sb-ra-ce" onclick="showTab('ra-ce')">
         <span class="sb-nav-icon">🎯</span> RA &amp; CE
       </button>
+      <button class="sb-nav-item" onclick="showTab('rubricas')">
+        <span class="sb-nav-icon">📐</span> Rúbricas
+      </button>
 
       <button class="sb-nav-item" id="sb-vista-alumno" onclick="toggleVistaAlumno()" title="Ver la app como la ve un alumno" style="background:linear-gradient(135deg,#dbeafe,#ede9fe);color:#1e40af;font-weight:600;border:1px solid #93c5fd;margin:6px 0;border-radius:8px">
         <span class="sb-nav-icon">👁️</span> Vista alumno
@@ -798,7 +818,8 @@ select.form-control{cursor:pointer}
     <div id="views-profesor" style="display:none">
 
       <!-- INICIO -->
-      <div class="view-area" id="view-inicio" style="display:none">
+      <div class="view-area" <div class="view-area" id="view-rubricas" style="display:none;flex-direction:column;padding:28px 32px;overflow-y:auto"></div>
+      id="view-inicio" style="display:none">
         <div class="page-hdr-row">
           <div class="page-hdr">
             <h1>Inicio</h1>
@@ -5321,6 +5342,20 @@ function renderEjercicioCard(ej, num, categoria, isProf, modoAlumno){
     </div>`;
   });
   
+  // Botones de entrega/corrección según rol
+  const isAlumnoView = modoAlumno && !isProf;
+  const ejCat = s.categoria || 'aprendizaje';
+  if(isAlumnoView){
+    html += `<div style="padding:12px 18px;display:flex;gap:8px;border-top:1px solid var(--border);background:#f8fafc">
+      <button class="btn btn-primary" style="flex:1" onclick="entregarActividad('${s.id}')">📤 Entregar</button>
+      <button class="btn" onclick="verResultadoAlumno('${s.id}')">📊 Mi resultado</button>
+    </div>`;
+  } else if(isProf){
+    html += `<div style="padding:10px 18px;display:flex;gap:8px;border-top:1px solid var(--border);background:#f8fafc;flex-wrap:wrap">
+      <button class="btn btn-sm" onclick="abrirCorreccionProfesor('${s.id}')">✏️ Corregir entregas</button>
+      <button class="btn btn-sm" onclick="publicarSolucion('${s.id}')">${s.solucion_publicada?'✅ Solución publicada':'👁️ Publicar solución'}</button>
+    </div>`;
+  }
   html += `<div class="ej-card-footer-band"></div></div>`;
   return html;
 }
@@ -8895,6 +8930,657 @@ function asiVista(id, vista){
   if(vista === 'libroMayor') abrirLibroMayor(ejId, 'mayor');
   else if(vista === 'cuentasAnuales') abrirLibroMayor(ejId, 'balance');
 }
+
+/* ════════════════════════════════════════════════════════════════
+   SISTEMA DE CORRECCIÓN, RÚBRICAS Y ENTREGAS
+════════════════════════════════════════════════════════════════ */
+
+/* ─── Estado global ─── */
+let _rubricas = [];
+let _entregas = [];
+let _editingRubricaId = null;
+let _rubricaCriterios = [];  // criterios editando en modal
+
+/* ─── Carga de datos ─── */
+async function loadRubricas(){
+  if(!sb) return;
+  try {
+    const { data, error } = await sb.from('rubricas').select('*, rubrica_criterios(*)').order('creado_en', {ascending:false});
+    if(error) throw error;
+    _rubricas = data || [];
+    console.log('[SB] Rúbricas cargadas:', _rubricas.length);
+  } catch(e){ console.error('[SB] loadRubricas:', e); _rubricas = []; }
+}
+
+async function loadEntregas(actividadId){
+  if(!sb) return [];
+  try {
+    const q = sb.from('entregas').select('*, perfiles!alumno_id(nombre,email)').order('fecha_entrega', {ascending:false});
+    if(actividadId) q.eq('actividad_id', actividadId);
+    const { data, error } = await q;
+    if(error) throw error;
+    return data || [];
+  } catch(e){ console.error('[SB] loadEntregas:', e); return []; }
+}
+
+/* ════════════════════════════════════════
+   PANEL DE RÚBRICAS (vista profesor)
+════════════════════════════════════════ */
+function showRubricas(){
+  if(typeof showTab === 'function') showTab('rubricas');
+  renderRubricasPanel();
+}
+
+function renderRubricasPanel(){
+  const cont = document.getElementById('view-rubricas');
+  if(!cont) return;
+  const tipos = ['general','compras','ventas','nomina','amortizacion','prestamos','cierre','iva'];
+  const tiposLabel = {general:'General',compras:'Compras',ventas:'Ventas',nomina:'Nómina',amortizacion:'Amortización',prestamos:'Préstamos',cierre:'Cierre',iva:'IVA'};
+  
+  let html = `
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">📐 Rúbricas de evaluación</h2>
+        <p style="font-size:13px;color:var(--text2)">Rúbricas reutilizables por tipo de operación. Asígnalas a los ejercicios para corrección automática.</p>
+      </div>
+      <button class="btn btn-primary" onclick="openNewRubrica()">+ Nueva rúbrica</button>
+    </div>`;
+  
+  if(!_rubricas.length){
+    html += `<div class="empty-state">
+      <div style="font-size:48px">📐</div>
+      <div class="empty-state-title">Sin rúbricas</div>
+      <div class="empty-state-hint">Crea rúbricas reutilizables para corregir automáticamente los ejercicios</div>
+      <button class="btn btn-primary" onclick="openNewRubrica()" style="margin-top:12px">+ Crear primera rúbrica</button>
+    </div>`;
+  } else {
+    // Group by tipo
+    const byTipo = {};
+    _rubricas.forEach(r => {
+      const t = r.tipo_operacion || 'general';
+      if(!byTipo[t]) byTipo[t] = [];
+      byTipo[t].push(r);
+    });
+    
+    Object.keys(byTipo).forEach(tipo => {
+      html += `<div style="margin-bottom:24px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px">${tiposLabel[tipo]||tipo}</div>
+        <div style="display:grid;gap:10px">`;
+      
+      byTipo[tipo].forEach(r => {
+        const criterios = r.rubrica_criterios || [];
+        html += `
+          <div class="rubrica-card">
+            <div class="rubrica-card-head">
+              <div>
+                <div style="font-weight:600;font-size:15px">${r.nombre}</div>
+                ${r.descripcion ? `<div style="font-size:12px;color:var(--text2);margin-top:2px">${r.descripcion}</div>` : ''}
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-weight:700;font-size:18px;color:var(--navy)">${r.puntos_totales} pts</span>
+                <button class="btn btn-xs" onclick="openEditRubrica('${r.id}')">✏️</button>
+                <button class="btn btn-xs btn-danger" onclick="deleteRubrica('${r.id}')">🗑️</button>
+              </div>
+            </div>
+            ${criterios.length ? `
+            <div class="rubrica-criterios">
+              ${criterios.sort((a,b)=>a.orden-b.orden).map(c => `
+                <div class="rubrica-criterio-row">
+                  <span style="flex:1;font-size:13px">${c.nombre}</span>
+                  <span style="font-weight:600;color:var(--navy);font-size:13px">${c.puntos_max} pts</span>
+                </div>`).join('')}
+            </div>` : ''}
+          </div>`;
+      });
+      html += `</div></div>`;
+    });
+  }
+  cont.innerHTML = html;
+}
+
+/* ─── Modal nueva/editar rúbrica ─── */
+function openNewRubrica(){
+  _editingRubricaId = null;
+  _rubricaCriterios = [];
+  document.getElementById('rubrica-nombre').value = '';
+  document.getElementById('rubrica-desc').value = '';
+  document.getElementById('rubrica-tipo').value = 'general';
+  document.getElementById('rubrica-puntos').value = '10';
+  renderRubricaCriterios();
+  document.getElementById('modal-rubrica-title').textContent = 'Nueva rúbrica';
+  document.getElementById('modal-rubrica').classList.add('open');
+}
+
+function openEditRubrica(id){
+  const r = _rubricas.find(x => x.id === id);
+  if(!r) return;
+  _editingRubricaId = id;
+  _rubricaCriterios = (r.rubrica_criterios || []).sort((a,b) => a.orden - b.orden).map(c => ({...c}));
+  document.getElementById('rubrica-nombre').value = r.nombre || '';
+  document.getElementById('rubrica-desc').value = r.descripcion || '';
+  document.getElementById('rubrica-tipo').value = r.tipo_operacion || 'general';
+  document.getElementById('rubrica-puntos').value = r.puntos_totales || 10;
+  renderRubricaCriterios();
+  document.getElementById('modal-rubrica-title').textContent = 'Editar rúbrica';
+  document.getElementById('modal-rubrica').classList.add('open');
+}
+
+function renderRubricaCriterios(){
+  const cont = document.getElementById('rubrica-criterios-cont');
+  if(!cont) return;
+  if(!_rubricaCriterios.length){
+    cont.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;background:var(--surface2);border-radius:8px">
+      Sin criterios. Añade al menos uno.</div>`;
+    return;
+  }
+  cont.innerHTML = _rubricaCriterios.map((c,i) => `
+    <div class="rubrica-criterio-edit" data-idx="${i}">
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <div style="flex:1">
+          <input class="form-control" style="margin-bottom:6px" placeholder="Nombre del criterio (ej: Exactitud contable)" value="${c.nombre||''}" oninput="_rubricaCriterios[${i}].nombre=this.value">
+          <input class="form-control form-control-sm" placeholder="Descripción opcional" value="${c.descripcion||''}" oninput="_rubricaCriterios[${i}].descripcion=this.value">
+        </div>
+        <div style="width:80px">
+          <label class="form-label" style="font-size:10px">Puntos máx</label>
+          <input class="form-control" type="number" min="0" step="0.5" value="${c.puntos_max||0}" oninput="_rubricaCriterios[${i}].puntos_max=parseFloat(this.value)||0">
+        </div>
+        <button class="btn btn-xs btn-danger" onclick="removeRubricaCriterio(${i})" style="margin-top:20px">✕</button>
+      </div>
+      <div style="margin-top:8px">
+        <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px">NIVELES DE LOGRO</div>
+        ${renderNiveles(i, c.niveles||[])}
+        <button class="btn btn-xs" onclick="addNivel(${i})" style="margin-top:4px">+ Nivel</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderNiveles(criterioIdx, niveles){
+  return (niveles||[]).map((n,ni) => `
+    <div style="display:flex;gap:6px;margin-bottom:4px;align-items:center">
+      <input class="form-control form-control-sm" placeholder="Nivel (ej: Excelente)" value="${n.nivel||''}" style="flex:1" oninput="_rubricaCriterios[${criterioIdx}].niveles[${ni}].nivel=this.value">
+      <input class="form-control form-control-sm" type="number" min="0" step="0.5" value="${n.puntos||0}" style="width:70px" oninput="_rubricaCriterios[${criterioIdx}].niveles[${ni}].puntos=parseFloat(this.value)||0">
+      <button class="btn btn-xs btn-danger" onclick="removeNivel(${criterioIdx},${ni})">✕</button>
+    </div>`).join('');
+}
+
+function addRubricaCriterio(){
+  _rubricaCriterios.push({nombre:'', descripcion:'', puntos_max:0, niveles:[], orden:_rubricaCriterios.length});
+  renderRubricaCriterios();
+}
+function removeRubricaCriterio(i){ _rubricaCriterios.splice(i,1); renderRubricaCriterios(); }
+function addNivel(ci){
+  if(!_rubricaCriterios[ci].niveles) _rubricaCriterios[ci].niveles = [];
+  _rubricaCriterios[ci].niveles.push({nivel:'',puntos:0,desc:''});
+  renderRubricaCriterios();
+}
+function removeNivel(ci,ni){ _rubricaCriterios[ci].niveles.splice(ni,1); renderRubricaCriterios(); }
+
+async function saveRubrica(){
+  const nombre = document.getElementById('rubrica-nombre').value.trim();
+  if(!nombre){ if(typeof toast==='function') toast('Escribe un nombre'); return; }
+  if(!_rubricaCriterios.length){ if(typeof toast==='function') toast('Añade al menos un criterio'); return; }
+  
+  const rid = _editingRubricaId || 'rbr_'+(typeof uid==='function'?uid():Date.now().toString(36));
+  const rObj = {
+    id: rid,
+    nombre,
+    descripcion: document.getElementById('rubrica-desc').value.trim(),
+    tipo_operacion: document.getElementById('rubrica-tipo').value,
+    puntos_totales: parseFloat(document.getElementById('rubrica-puntos').value)||10,
+    creado_por: sbUser?.id
+  };
+  
+  try {
+    const { error: re } = _editingRubricaId
+      ? await sb.from('rubricas').update(rObj).eq('id', rid)
+      : await sb.from('rubricas').insert(rObj);
+    if(re) throw re;
+    
+    // Delete old criterios and re-insert
+    await sb.from('rubrica_criterios').delete().eq('rubrica_id', rid);
+    
+    const criteriosToInsert = _rubricaCriterios.map((c,i) => ({
+      id: c.id || 'crit_'+(typeof uid==='function'?uid():Date.now().toString(36)+i),
+      rubrica_id: rid,
+      orden: i,
+      nombre: c.nombre,
+      descripcion: c.descripcion||'',
+      puntos_max: c.puntos_max||0,
+      niveles: c.niveles||[]
+    }));
+    
+    if(criteriosToInsert.length){
+      const { error: ce } = await sb.from('rubrica_criterios').insert(criteriosToInsert);
+      if(ce) throw ce;
+    }
+    
+    if(typeof toast==='function') toast(_editingRubricaId ? 'Rúbrica actualizada ✓' : 'Rúbrica creada ✓');
+    closeModal('modal-rubrica');
+    await loadRubricas();
+    renderRubricasPanel();
+  } catch(e){
+    console.error('saveRubrica:', e);
+    if(typeof toast==='function') toast('❌ Error: '+e.message);
+  }
+}
+
+async function deleteRubrica(id){
+  if(!confirm('¿Eliminar esta rúbrica?')) return;
+  try {
+    const { error } = await sb.from('rubricas').delete().eq('id', id);
+    if(error) throw error;
+    if(typeof toast==='function') toast('Rúbrica eliminada');
+    await loadRubricas();
+    renderRubricasPanel();
+  } catch(e){ if(typeof toast==='function') toast('❌ '+e.message); }
+}
+
+/* ════════════════════════════════════════
+   CORRECCIÓN AUTOMÁTICA
+════════════════════════════════════════ */
+function corregirAutomatico(respuestaAlumno, solucionProfesor, rubrica){
+  // respuestaAlumno: [{asiento_idx, lineas:[{codigo,nombre,debe,haber}]}]
+  // solucionProfesor: asientos_compuestos o lineas del ejercicio
+  
+  const solucion = solucionProfesor.asientos_compuestos || 
+    [{titulo:'Asiento', lineas: solucionProfesor.lineas||[]}];
+  
+  let totalPuntos = 0;
+  let maxPuntos = 0;
+  const detalle = [];
+  const errores = [];
+  const aciertos = [];
+  
+  solucion.forEach((asi, ai) => {
+    const respAsi = respuestaAlumno[ai] || {lineas:[]};
+    asi.lineas.forEach((linSol, li) => {
+      const linAlu = respAsi.lineas[li];
+      maxPuntos += 1;
+      
+      const codigoOk = linAlu && String(linAlu.codigo||'').trim() === String(linSol.codigo||'').trim();
+      const debeOk   = linAlu && Math.abs((parseFloat(linAlu.debe)||0) - (parseFloat(linSol.debe)||0)) < 0.02;
+      const haberOk  = linAlu && Math.abs((parseFloat(linAlu.haber)||0) - (parseFloat(linSol.haber)||0)) < 0.02;
+      
+      const correcto = codigoOk && debeOk && haberOk;
+      if(correcto){
+        totalPuntos += 1;
+        aciertos.push(`Línea ${li+1}: (${linSol.codigo}) ${linSol.nombre} ✓`);
+      } else {
+        const errMsg = [];
+        if(!codigoOk) errMsg.push(`cuenta incorrecta (era ${linSol.codigo})`);
+        if(!debeOk)   errMsg.push(`importe Debe incorrecto (correcto: ${linSol.debe})`);
+        if(!haberOk)  errMsg.push(`importe Haber incorrecto (correcto: ${linSol.haber})`);
+        errores.push(`Línea ${li+1} (${linSol.codigo} ${linSol.nombre}): ${errMsg.join(', ')}`);
+      }
+      
+      detalle.push({ asiento: ai, linea: li, correcto, codigo_sol: linSol.codigo, 
+        debe_sol: linSol.debe, haber_sol: linSol.haber, codigo_alu: linAlu?.codigo,
+        debe_alu: linAlu?.debe, haber_alu: linAlu?.haber });
+    });
+  });
+  
+  const pct = maxPuntos > 0 ? totalPuntos / maxPuntos : 0;
+  const puntosTotales = rubrica ? rubrica.puntos_totales || 10 : 10;
+  const notaAuto = +(pct * puntosTotales).toFixed(2);
+  
+  // Generar feedback automático
+  let feedback = '';
+  if(pct >= 0.9){
+    feedback = `¡Excelente trabajo! Has completado el ejercicio con un ${Math.round(pct*100)}% de acierto. ${aciertos.length > 0 ? 'Todos los asientos están correctamente registrados.' : ''}`;
+  } else if(pct >= 0.7){
+    feedback = `Buen trabajo. Has acertado el ${Math.round(pct*100)}% del ejercicio. `;
+    if(errores.length) feedback += `Revisa los siguientes puntos: ${errores.slice(0,2).join('; ')}.`;
+  } else if(pct >= 0.5){
+    feedback = `Resultado aceptable (${Math.round(pct*100)}% de acierto). Necesitas revisar algunos conceptos. `;
+    if(errores.length) feedback += `Errores principales: ${errores.slice(0,3).join('; ')}.`;
+  } else {
+    feedback = `El ejercicio necesita revisión. Solo has acertado el ${Math.round(pct*100)}%. `;
+    if(errores.length) feedback += `Errores: ${errores.slice(0,4).join('; ')}. Te recomiendo repasar los apuntes del tema.`;
+  }
+  
+  return { notaAuto, feedback, detalle, pct, totalPuntos, maxPuntos };
+}
+
+/* ════════════════════════════════════════
+   ENTREGAR ACTIVIDAD (alumno)
+════════════════════════════════════════ */
+async function entregarActividad(ejercicioId){
+  const ej = (asientos||[]).find(x => x.id === ejercicioId);
+  if(!ej){ if(typeof toast==='function') toast('Ejercicio no encontrado'); return; }
+  
+  // Recoger respuesta del alumno desde los inputs del DOM
+  const asientosArr = ej.asientos_compuestos && ej.asientos_compuestos.length
+    ? ej.asientos_compuestos
+    : [{lineas: ej.lineas||[]}];
+  
+  const respuesta = asientosArr.map((asi, ai) => {
+    const asientoId = `${ejercicioId}__${ai}`;
+    const lineas = [];
+    const tbody = document.querySelector(`#asi-view-${asientoId} table tbody, [data-asiento="${asientoId}"] tbody`);
+    if(tbody){
+      tbody.querySelectorAll('tr').forEach(tr => {
+        const inputs = tr.querySelectorAll('input');
+        if(inputs.length >= 4){
+          lineas.push({
+            codigo: inputs[0]?.value?.trim()||'',
+            nombre: inputs[1]?.value?.trim()||'',
+            debe:   parseFloat(inputs[2]?.value)||0,
+            haber:  parseFloat(inputs[3]?.value)||0
+          });
+        }
+      });
+    }
+    return { asiento_idx: ai, lineas };
+  });
+  
+  // Corrección automática
+  const rubrica = _rubricas.find(r => r.id === ej.rubrica_id) || null;
+  const { notaAuto, feedback, detalle } = corregirAutomatico(respuesta, ej, rubrica);
+  
+  const entregaId = 'ent_'+(typeof uid==='function'?uid():Date.now().toString(36));
+  const publicaAuto = ej.publicacion_notas === 'automatica';
+  
+  const entrega = {
+    id: entregaId,
+    actividad_id: ejercicioId,
+    actividad_tipo: 'asiento',
+    alumno_id: sbUser?.id,
+    tema_id: ej.tema,
+    respuesta,
+    estado: publicaAuto ? 'publicada' : 'entregada',
+    nota_auto: notaAuto,
+    feedback_auto: feedback,
+    detalle_auto: detalle,
+    nota_final: publicaAuto ? notaAuto : null,
+    publicada: publicaAuto,
+    fecha_publicacion: publicaAuto ? new Date().toISOString() : null
+  };
+  
+  try {
+    const { error } = await sb.from('entregas').upsert(entrega, {onConflict:'actividad_id,alumno_id'});
+    if(error) throw error;
+    
+    if(typeof toast==='function'){
+      if(publicaAuto){
+        toast(`✅ Entregado. Nota: ${notaAuto}/10`);
+      } else {
+        toast('✅ Entregado. Tu profesor revisará y publicará la nota.');
+      }
+    }
+    
+    // Refresh the exercise card to show delivery state
+    if(activeTemaId && typeof ttFolder==='function'){
+      const tab = document.querySelector('.ft-tab.active')?.dataset?.ttf;
+      if(tab) ttFolder(activeTemaId, tab);
+    }
+  } catch(e){
+    console.error('entregarActividad:', e);
+    if(typeof toast==='function') toast('❌ Error al entregar: '+e.message);
+  }
+}
+
+/* ════════════════════════════════════════
+   PANEL CORRECCIÓN DEL PROFESOR
+════════════════════════════════════════ */
+async function abrirCorreccionProfesor(ejercicioId){
+  const ej = (asientos||[]).find(x => x.id === ejercicioId);
+  if(!ej){ if(typeof toast==='function') toast('Ejercicio no encontrado'); return; }
+  
+  const entregas = await loadEntregas(ejercicioId);
+  
+  const modal = document.getElementById('modal-correccion');
+  const body  = document.getElementById('modal-correccion-body');
+  
+  if(!modal || !body){ if(typeof toast==='function') toast('Modal de corrección no disponible'); return; }
+  
+  const rubrica = _rubricas.find(r => r.id === ej.rubrica_id);
+  
+  let html = `
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;font-weight:700">Ejercicio</div>
+        <div style="font-weight:600;font-size:15px">${ej.titulo}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:12px;color:var(--text2)">Rúbrica:</span>
+        <select class="form-control" style="width:200px" onchange="asignarRubricaEjercicio('${ej.id}',this.value)">
+          <option value="">Sin rúbrica</option>
+          ${_rubricas.map(r => `<option value="${r.id}" ${r.id===ej.rubrica_id?'selected':''}>${r.nombre}</option>`).join('')}
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:12px;color:var(--text2)">Publicación:</span>
+        <select class="form-control" style="width:160px" onchange="cambiarPublicacion('${ej.id}',this.value)">
+          <option value="manual" ${ej.publicacion_notas!=='automatica'?'selected':''}>Manual</option>
+          <option value="automatica" ${ej.publicacion_notas==='automatica'?'selected':''}>Automática</option>
+        </select>
+      </div>
+    </div>
+    
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:600">${entregas.length} entrega${entregas.length!==1?'s':''}</div>
+      ${entregas.length ? `<button class="btn btn-sm btn-primary" onclick="publicarTodasLasNotas('${ej.id}')">📢 Publicar todas las notas</button>` : ''}
+    </div>`;
+  
+  if(!entregas.length){
+    html += `<div style="text-align:center;padding:30px;color:var(--text3)">
+      <div style="font-size:36px">📭</div>
+      <div>Ningún alumno ha entregado todavía</div>
+    </div>`;
+  } else {
+    html += entregas.map(e => `
+      <div class="correccion-card" id="correccion-${e.id}">
+        <div class="correccion-head">
+          <div>
+            <div style="font-weight:600">${e.perfiles?.nombre||'Alumno'}</div>
+            <div style="font-size:11px;color:var(--text3)">${new Date(e.fecha_entrega).toLocaleString('es-ES')}</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="badge ${e.publicada?'badge-success':'badge-warning'}">${e.publicada?'Publicada':'Pendiente'}</span>
+            <span style="font-weight:700;font-size:18px">${e.nota_final??e.nota_auto??'—'}/10</span>
+          </div>
+        </div>
+        <div class="correccion-body">
+          <!-- Respuesta del alumno vs solución -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px">RESPUESTA DEL ALUMNO</div>
+              ${renderRespuestaAlumno(e.respuesta||[], e.detalle_auto||[])}
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px">SOLUCIÓN CORRECTA</div>
+              ${renderSolucionProfesor(ej)}
+            </div>
+          </div>
+          <!-- Feedback automático -->
+          <div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:12px">
+            <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:4px">FEEDBACK AUTOMÁTICO</div>
+            <div style="font-size:13px;color:var(--text2)">${e.feedback_auto||'—'}</div>
+          </div>
+          <!-- Ajuste manual del profesor -->
+          <div style="display:grid;grid-template-columns:100px 1fr;gap:10px;align-items:start">
+            <div>
+              <label class="form-label">Nota final</label>
+              <input class="form-control" type="number" min="0" max="10" step="0.25" 
+                value="${e.nota_final??e.nota_auto??''}" 
+                id="nota-${e.id}"
+                placeholder="${e.nota_auto??''}">
+            </div>
+            <div>
+              <label class="form-label">Comentario del profesor</label>
+              <textarea class="form-control" rows="2" id="feedback-${e.id}" 
+                placeholder="Añade un comentario personalizado para el alumno...">${e.feedback_profesor||''}</textarea>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+            <button class="btn btn-sm" onclick="guardarCorreccion('${e.id}','${ej.id}',false)">💾 Guardar</button>
+            <button class="btn btn-sm btn-primary" onclick="guardarCorreccion('${e.id}','${ej.id}',true)">📢 Guardar y publicar</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+  
+  document.getElementById('modal-correccion-ejercicio').textContent = ej.titulo;
+  body.innerHTML = html;
+  modal.classList.add('open');
+}
+
+function renderRespuestaAlumno(respuesta, detalle){
+  if(!respuesta.length) return '<div style="color:var(--text3);font-size:13px">Sin respuesta</div>';
+  let html = '';
+  respuesta.forEach((asi, ai) => {
+    (asi.lineas||[]).forEach((l,li) => {
+      const det = detalle.find(d => d.asiento===ai && d.linea===li);
+      const ok = det?.correcto;
+      const color = ok===true ? '#15803d' : ok===false ? '#dc2626' : 'inherit';
+      const bg = ok===true ? '#f0fdf4' : ok===false ? '#fef2f2' : 'transparent';
+      html += `<div style="font-size:12px;padding:4px 8px;border-radius:4px;margin-bottom:2px;background:${bg};color:${color};display:flex;gap:8px">
+        <span style="font-family:monospace;font-weight:600;min-width:50px">${l.codigo||'—'}</span>
+        <span style="flex:1">${l.nombre||'—'}</span>
+        <span style="font-family:monospace">${l.debe||0} / ${l.haber||0}</span>
+        <span>${ok===true?'✓':ok===false?'✗':''}</span>
+      </div>`;
+    });
+  });
+  return html;
+}
+
+function renderSolucionProfesor(ej){
+  const asientos = ej.asientos_compuestos || [{lineas:ej.lineas||[]}];
+  let html = '';
+  asientos.forEach(asi => {
+    (asi.lineas||[]).forEach(l => {
+      html += `<div style="font-size:12px;padding:4px 8px;border-radius:4px;margin-bottom:2px;background:#f0fdf4;color:#15803d;display:flex;gap:8px">
+        <span style="font-family:monospace;font-weight:600;min-width:50px">${l.codigo||'—'}</span>
+        <span style="flex:1">${l.nombre||'—'}</span>
+        <span style="font-family:monospace">${l.debe||0} / ${l.haber||0}</span>
+      </div>`;
+    });
+  });
+  return html;
+}
+
+async function guardarCorreccion(entregaId, ejercicioId, publicar){
+  const nota = parseFloat(document.getElementById('nota-'+entregaId)?.value);
+  const feedback = document.getElementById('feedback-'+entregaId)?.value?.trim()||'';
+  
+  const update = {
+    nota_final: isNaN(nota) ? null : nota,
+    feedback_profesor: feedback,
+    estado: publicar ? 'publicada' : 'corregida',
+    publicada: publicar,
+    corregido_por: sbUser?.id,
+    fecha_correccion: new Date().toISOString(),
+    fecha_publicacion: publicar ? new Date().toISOString() : null
+  };
+  
+  try {
+    const { error } = await sb.from('entregas').update(update).eq('id', entregaId);
+    if(error) throw error;
+    if(typeof toast==='function') toast(publicar ? '📢 Corregido y publicado' : '✅ Corrección guardada');
+    // Refresh
+    abrirCorreccionProfesor(ejercicioId);
+  } catch(e){
+    if(typeof toast==='function') toast('❌ '+e.message);
+  }
+}
+
+async function publicarTodasLasNotas(ejercicioId){
+  if(!confirm('¿Publicar todas las notas de este ejercicio?')) return;
+  try {
+    const { error } = await sb.from('entregas')
+      .update({ publicada: true, estado: 'publicada', fecha_publicacion: new Date().toISOString() })
+      .eq('actividad_id', ejercicioId);
+    if(error) throw error;
+    if(typeof toast==='function') toast('📢 Todas las notas publicadas');
+    abrirCorreccionProfesor(ejercicioId);
+  } catch(e){ if(typeof toast==='function') toast('❌ '+e.message); }
+}
+
+async function asignarRubricaEjercicio(ejId, rubricaId){
+  try {
+    const { error } = await sb.from('asientos').update({rubrica_id: rubricaId||null}).eq('id', ejId);
+    if(error) throw error;
+    const ej = (asientos||[]).find(x => x.id === ejId);
+    if(ej) ej.rubrica_id = rubricaId || null;
+    if(typeof toast==='function') toast('Rúbrica asignada ✓');
+  } catch(e){ if(typeof toast==='function') toast('❌ '+e.message); }
+}
+
+async function cambiarPublicacion(ejId, modo){
+  try {
+    const { error } = await sb.from('asientos').update({publicacion_notas: modo}).eq('id', ejId);
+    if(error) throw error;
+    const ej = (asientos||[]).find(x => x.id === ejId);
+    if(ej) ej.publicacion_notas = modo;
+    if(typeof toast==='function') toast('Modo de publicación actualizado ✓');
+  } catch(e){ if(typeof toast==='function') toast('❌ '+e.message); }
+}
+
+/* ════════════════════════════════════════
+   VISTA ALUMNO: ver su nota y corrección
+════════════════════════════════════════ */
+async function verResultadoAlumno(ejercicioId){
+  if(!sb || !sbUser) return;
+  try {
+    const { data, error } = await sb.from('entregas')
+      .select('*')
+      .eq('actividad_id', ejercicioId)
+      .eq('alumno_id', sbUser.id)
+      .single();
+    
+    if(error || !data){ if(typeof toast==='function') toast('No has entregado este ejercicio todavía'); return; }
+    
+    const ej = (asientos||[]).find(x => x.id === ejercicioId);
+    const modal = document.getElementById('modal-resultado-alumno');
+    const body  = document.getElementById('modal-resultado-body');
+    if(!modal || !body) return;
+    
+    const nota = data.publicada ? (data.nota_final ?? data.nota_auto) : null;
+    const feedback = data.publicada ? (data.feedback_profesor || data.feedback_auto) : null;
+    
+    body.innerHTML = `
+      <div style="text-align:center;padding:20px 0">
+        ${data.publicada ? `
+          <div style="font-family:serif;font-size:52px;font-weight:700;color:${nota>=5?'#15803d':'#dc2626'}">${nota}/10</div>
+          <div style="font-size:13px;color:var(--text2);margin-top:6px">${nota>=9?'Sobresaliente':nota>=7?'Notable':nota>=6?'Bien':nota>=5?'Suficiente':'Insuficiente'}</div>
+        ` : `
+          <div style="font-size:36px">⏳</div>
+          <div style="font-size:14px;color:var(--text2);margin-top:8px">Tu profesor está revisando tu entrega.</div>
+          <div style="font-size:12px;color:var(--text3)">La nota se publicará próximamente.</div>
+        `}
+      </div>
+      ${feedback ? `
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px;margin-bottom:14px">
+          <div style="font-size:11px;font-weight:700;color:#15803d;margin-bottom:6px">COMENTARIO DEL PROFESOR</div>
+          <div style="font-size:13px;color:#1c1c2e">${feedback}</div>
+        </div>` : ''}
+      ${data.publicada && ej?.solucion_publicada ? `
+        <div style="margin-top:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:8px">SOLUCIÓN CORRECTA</div>
+          ${renderSolucionProfesor(ej)}
+        </div>` : 
+        data.publicada ? `<div style="font-size:12px;color:var(--text3);margin-top:8px;text-align:center">La solución estará disponible cuando el profesor la publique.</div>` : ''}
+    `;
+    
+    document.getElementById('modal-resultado-titulo').textContent = ej?.titulo||'Resultado';
+    modal.classList.add('open');
+  } catch(e){
+    console.error('verResultadoAlumno:', e);
+    if(typeof toast==='function') toast('❌ Error al cargar resultado');
+  }
+}
+
+async function publicarSolucion(ejId){
+  try {
+    const { error } = await sb.from('asientos').update({solucion_publicada: true}).eq('id', ejId);
+    if(error) throw error;
+    const ej = (asientos||[]).find(x => x.id === ejId);
+    if(ej) ej.solucion_publicada = true;
+    if(typeof toast==='function') toast('✅ Solución publicada para los alumnos');
+  } catch(e){ if(typeof toast==='function') toast('❌ '+e.message); }
+}
+
 </script>
 
 
@@ -9786,5 +10472,86 @@ function asiVista(id, vista){
     </div>
   </div>
 </div>
+
+<!-- ═══ MODAL: RÚBRICA ═══ -->
+<div class="modal-bg" id="modal-rubrica">
+  <div class="modal modal-wide" style="max-width:720px">
+    <div class="modal-head">
+      <h3 id="modal-rubrica-title">Nueva rúbrica</h3>
+      <button class="btn btn-sm" onclick="closeModal('modal-rubrica')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:18px 22px;max-height:calc(90vh - 140px);overflow-y:auto">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:14px">
+        <div>
+          <label class="form-label">Nombre de la rúbrica *</label>
+          <input class="form-control" id="rubrica-nombre" placeholder="Ej: Rúbrica compras con IVA">
+        </div>
+        <div>
+          <label class="form-label">Tipo de operación</label>
+          <select class="form-control" id="rubrica-tipo">
+            <option value="general">General</option>
+            <option value="compras">Compras</option>
+            <option value="ventas">Ventas</option>
+            <option value="nomina">Nómina</option>
+            <option value="amortizacion">Amortización</option>
+            <option value="prestamos">Préstamos</option>
+            <option value="iva">IVA / Liquidación</option>
+            <option value="cierre">Cierre</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Puntos totales</label>
+          <input class="form-control" id="rubrica-puntos" type="number" min="0" step="0.5" value="10">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descripción</label>
+        <input class="form-control" id="rubrica-desc" placeholder="Descripción opcional">
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-size:13px;font-weight:600">Criterios de evaluación</div>
+          <button type="button" class="btn btn-xs btn-primary" onclick="addRubricaCriterio()">+ Añadir criterio</button>
+        </div>
+        <div id="rubrica-criterios-cont"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modal-rubrica')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveRubrica()">💾 Guardar rúbrica</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: CORRECCIÓN PROFESOR ═══ -->
+<div class="modal-bg" id="modal-correccion">
+  <div class="modal modal-wide" style="max-width:900px">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Corrección de ejercicio</div>
+        <h3 id="modal-correccion-ejercicio">—</h3>
+      </div>
+      <button class="btn btn-sm" onclick="closeModal('modal-correccion')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:18px 22px;max-height:calc(90vh - 140px);overflow-y:auto" id="modal-correccion-body">
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: RESULTADO ALUMNO ═══ -->
+<div class="modal-bg" id="modal-resultado-alumno">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-head">
+      <div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Mi resultado</div>
+        <h3 id="modal-resultado-titulo">—</h3>
+      </div>
+      <button class="btn btn-sm" onclick="closeModal('modal-resultado-alumno')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:18px 22px;max-height:calc(90vh - 140px);overflow-y:auto" id="modal-resultado-body">
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
