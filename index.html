@@ -818,7 +818,7 @@ select.form-control{cursor:pointer}
     <div id="views-profesor" style="display:none">
 
       <!-- INICIO -->
-      <div class="view-area" <div class="view-area" id="view-rubricas" style="display:none;flex-direction:column;padding:28px 32px;overflow-y:auto"></div>
+      <div class="view-area" id="view-rubricas" style="display:none;flex-direction:column;padding:28px 32px;overflow-y:auto"></div>
       id="view-inicio" style="display:none">
         <div class="page-hdr-row">
           <div class="page-hdr">
@@ -1502,48 +1502,101 @@ function logout(){
 
 /* ── showTab override to update sidebar state ── */
 function showTab(tab){
-  // Hide all professor views
-  document.querySelectorAll('#views-profesor .view-area').forEach(v=>v.style.display='none');
-  // Show target
-  const el=document.getElementById('view-'+tab);
-  if(el){
-    const isFlexView = ['view-rubricas','view-temas'].includes('view-'+tab);
-    el.style.display = isFlexView ? 'flex' : 'block';
+  // 1. Ocultar TODAS las vistas del profesor completamente
+  document.querySelectorAll('#views-profesor .view-area').forEach(function(v){
+    v.style.display = 'none';
+    // Scroll al inicio para evitar posiciones residuales
+    v.scrollTop = 0;
+  });
+  
+  // 2. Ocultar también el panel de detalle de tema para que no solape
+  var profDetEmpty = document.getElementById('prof-tema-detail-empty');
+  var profDetCont  = document.getElementById('prof-tema-detail-content');
+  if(tab !== 'contenidos'){
+    if(profDetEmpty) profDetEmpty.style.display = 'none';
+    if(profDetCont)  profDetCont.style.display  = 'none';
+    // Reset activeTemaId cuando salimos de temas
+    if(typeof activeTemaId !== 'undefined') activeTemaId = null;
   }
-  // Update topbar title
-  const titles={inicio:'Inicio',calendario:'Calendario',contenidos:'Contenidos',actividades:'Actividades',recursos:'Recursos',alumnos:'Mis Alumnos','ra-ce':'RA & CE','rubricas':'Rúbricas'};
-  document.getElementById('topbar-title').textContent=titles[tab]||tab;
-  // Update sidebar active
-  document.querySelectorAll('.sb-nav-item').forEach(b=>b.classList.remove('active'));
-  const sbEl=document.getElementById('sb-'+tab);
+  
+  // 3. Mostrar la vista destino
+  var el = document.getElementById('view-' + tab);
+  if(el){
+    var flexViews = ['view-rubricas', 'view-temas', 'view-contenidos'];
+    el.style.display = flexViews.indexOf('view-' + tab) >= 0 ? 'flex' : 'block';
+    el.scrollTop = 0;
+  }
+  
+  // 4. Actualizar título del topbar
+  var titles = {
+    inicio: 'Inicio', calendario: 'Calendario', contenidos: 'Temas',
+    actividades: 'Actividades', recursos: 'Recursos', alumnos: 'Mis Alumnos',
+    'ra-ce': 'RA & CE', rubricas: 'Rúbricas', generador: 'Generador',
+    'plan-cuentas': 'Plan de Cuentas', 'modelos-fiscales': 'Modelos Fiscales'
+  };
+  var titleEl = document.getElementById('topbar-title');
+  if(titleEl) titleEl.textContent = titles[tab] || tab;
+  
+  // 5. Actualizar botón activo en sidebar
+  document.querySelectorAll('#sb-nav-profesor .sb-nav-item').forEach(function(b){
+    b.classList.remove('active');
+  });
+  var sbEl = document.getElementById('sb-' + tab);
   if(sbEl) sbEl.classList.add('active');
-  // Tab-specific renders
-  if(tab==='inicio') renderInicio();
-  if(tab==='calendario') renderCalendario();
-  if(tab==='contenidos') renderTemasPanel();
-  if(tab==='actividades'){ renderActivities(); renderAsientosList(); }
-  if(tab==='recursos') renderResources();
-  if(tab==='ra-ce') renderRaCe();
-
-  if(tab==='alumnos') renderAlumnos();
-  if(tab==='rubricas' && typeof renderRubricasPanel === 'function') renderRubricasPanel();
+  
+  // 6. Renderizar la vista correspondiente
+  if(tab === 'inicio')       { if(typeof renderInicio === 'function') renderInicio(); }
+  if(tab === 'calendario')   { if(typeof renderCalendario === 'function') renderCalendario(); }
+  if(tab === 'contenidos')   { if(typeof renderTemasPanel === 'function') renderTemasPanel(); }
+  if(tab === 'actividades')  { if(typeof renderActivities === 'function') renderActivities(); if(typeof renderAsientosList === 'function') renderAsientosList(); }
+  if(tab === 'recursos')     { if(typeof renderResources === 'function') renderResources(); }
+  if(tab === 'ra-ce')        { if(typeof renderRaCe === 'function') renderRaCe(); }
+  if(tab === 'alumnos')      { if(typeof renderAlumnos === 'function') renderAlumnos(); }
+  if(tab === 'rubricas')     { if(typeof renderRubricasPanel === 'function') renderRubricasPanel(); }
 }
 
 function showTabAlumno(tab){
-  document.querySelectorAll('#views-alumno .view-area').forEach(v=>v.style.display='none');
-  const el=document.getElementById('view-'+tab);
-  if(el) el.style.display='block';
-  const titles={'alu-inicio':'Mi Inicio','alu-calendario':'Calendario','alu-contenidos':'Temas','alu-actividades':'Actividades','alu-asientos':'Asientos','alu-progreso':'Mi Progreso'};
-  document.getElementById('topbar-title').textContent=titles[tab]||tab;
-  document.querySelectorAll('#sb-nav-alumno .sb-nav-item').forEach(b=>b.classList.remove('active'));
-  const sbEl=document.getElementById('sb-'+tab);
+  // Ocultar todas las vistas del alumno limpiamente
+  document.querySelectorAll('#views-alumno .view-area').forEach(function(v){
+    v.style.display = 'none';
+    v.scrollTop = 0;
+  });
+  
+  // Ocultar panel detalle de tema si salimos de contenidos
+  if(tab !== 'alu-contenidos'){
+    var aluDet = document.getElementById('alu-tema-detail-panel');
+    if(aluDet){ aluDet.style.display = 'none'; }
+    var tdeEmpty = document.getElementById('tema-detail-empty');
+    var tdeCont  = document.getElementById('tema-detail-content');
+    if(tdeEmpty) tdeEmpty.style.display = 'none';
+    if(tdeCont)  tdeCont.style.display  = 'none';
+    if(typeof activeTemaId !== 'undefined') activeTemaId = null;
+  }
+  
+  // Mostrar vista destino
+  var el = document.getElementById('view-' + tab);
+  if(el){ el.style.display = 'block'; el.scrollTop = 0; }
+  
+  // Topbar
+  var titles = {'alu-inicio':'Mi Inicio','alu-calendario':'Calendario','alu-contenidos':'Temas',
+    'alu-actividades':'Actividades','alu-asientos':'Asientos','alu-progreso':'Mi Progreso'};
+  var titleEl = document.getElementById('topbar-title');
+  if(titleEl) titleEl.textContent = titles[tab] || tab;
+  
+  // Sidebar activo
+  document.querySelectorAll('#sb-nav-alumno .sb-nav-item').forEach(function(b){
+    b.classList.remove('active');
+  });
+  var sbEl = document.getElementById('sb-' + tab);
   if(sbEl) sbEl.classList.add('active');
-  if(tab==='alu-inicio') renderAluInicio();
-  if(tab==='alu-contenidos') renderAluContenidos();
-  if(tab==='alu-actividades') renderAluActividades();
-  if(tab==='alu-calendario') renderAluCalendario();
-  if(tab==='alu-asientos') renderAluAsientos();
-  if(tab==='alu-progreso') renderAluProgreso();
+  
+  // Render
+  if(tab==='alu-inicio')      { if(typeof renderAluInicio === 'function') renderAluInicio(); }
+  if(tab==='alu-contenidos')  { if(typeof renderAluContenidos === 'function') renderAluContenidos(); }
+  if(tab==='alu-actividades') { if(typeof renderAluActividades === 'function') renderAluActividades(); }
+  if(tab==='alu-calendario')  { if(typeof renderAluCalendario === 'function') renderAluCalendario(); }
+  if(tab==='alu-asientos')    { if(typeof renderAluAsientos === 'function') renderAluAsientos(); }
+  if(tab==='alu-progreso')    { if(typeof renderAluProgreso === 'function') renderAluProgreso(); }
 }
 
 /* ── Código de clase ── */
