@@ -1506,9 +1506,12 @@ function showTab(tab){
   document.querySelectorAll('#views-profesor .view-area').forEach(v=>v.style.display='none');
   // Show target
   const el=document.getElementById('view-'+tab);
-  if(el) el.style.display='block';
+  if(el){
+    const isFlexView = ['view-rubricas','view-temas'].includes('view-'+tab);
+    el.style.display = isFlexView ? 'flex' : 'block';
+  }
   // Update topbar title
-  const titles={inicio:'Inicio',calendario:'Calendario',contenidos:'Contenidos',actividades:'Actividades',recursos:'Recursos',alumnos:'Mis Alumnos','ra-ce':'RA & CE'};
+  const titles={inicio:'Inicio',calendario:'Calendario',contenidos:'Contenidos',actividades:'Actividades',recursos:'Recursos',alumnos:'Mis Alumnos','ra-ce':'RA & CE','rubricas':'Rúbricas'};
   document.getElementById('topbar-title').textContent=titles[tab]||tab;
   // Update sidebar active
   document.querySelectorAll('.sb-nav-item').forEach(b=>b.classList.remove('active'));
@@ -1523,6 +1526,7 @@ function showTab(tab){
   if(tab==='ra-ce') renderRaCe();
 
   if(tab==='alumnos') renderAlumnos();
+  if(tab==='rubricas' && typeof renderRubricasPanel === 'function') renderRubricasPanel();
 }
 
 function showTabAlumno(tab){
@@ -4004,6 +4008,7 @@ try {
   if(typeof renderTemasSidebar === 'function') renderTemasSidebar();
   if(typeof getAlumnos === 'function' && typeof updateCounts === 'function') updateCounts();
   if(typeof renderInicio === 'function') renderInicio();
+
 } catch(e) {
   console.log('[init] Render diferido hasta login:', e.message);
 }
